@@ -3,7 +3,7 @@ from bson import json_util
 from flask import render_template
 import requests
 
-class TestController:
+class QAController:
   def getSampleData():
     getNewestData = requests.get('https://api.thingspeak.com/channels/2044945/feeds.json?api_key=UMVXZ6J6YC9JPAVT&results=1')
     newData = getNewestData.json()
