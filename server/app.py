@@ -1,4 +1,3 @@
-
 from flask import Flask
 from config import HOST, PORT, DEBUG
 from routes.Router import Router

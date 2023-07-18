@@ -1,5 +1,3 @@
-import os
-
 HOST = 'localhost'
 PORT = 5000
 
