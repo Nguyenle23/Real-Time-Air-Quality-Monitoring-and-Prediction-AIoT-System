@@ -32,6 +32,40 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.indigo[800],
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Center(
+              child: Image(
+                image: AssetImage('assets/images/faviconIU1.png'),
+                height: 40,
+                width: 40,
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Center(
+              child: Text(
+                'Air Quality App',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontFamily: 'Kanit Medium 500'
+                ),
+              ),
+            ),
+          ],
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
+      ),
       body: Center(
         child: _pages.elementAt(_selectedIndex), //New
       ),
@@ -39,26 +73,27 @@ class _HomeScreenState extends State<HomeScreen> {
         iconSize: 25,
         currentIndex: _selectedIndex, //New
         onTap: _onItemTapped,
-        unselectedItemColor: Colors.black.withOpacity(0.5),
-        selectedItemColor: Colors.blue,
-        items: const <BottomNavigationBarItem>[
+        unselectedItemColor: const Color.fromARGB(255, 236, 236, 236).withOpacity(0.5),
+        selectedItemColor: Colors.white,
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
+            backgroundColor: Colors.indigo[800],
+            icon: const Icon(Icons.dashboard_outlined),
             label: 'Dashboard',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.language_outlined),
             label: 'Map',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.area_chart_outlined),
             label: 'Chart',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.info_outline_rounded),
             label: 'Information',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             label: 'Settings',
           ),

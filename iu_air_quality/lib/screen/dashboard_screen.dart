@@ -63,38 +63,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Center(
-              child: Image(
-                image: AssetImage('assets/images/faviconIU1.png'),
-                height: 40,
-                width: 40,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Center(
-              child: Text(
-                'Air Quality App',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                ),
-              ),
-            ),
-          ],
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   backgroundColor: Colors.indigo[800],
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: const [
+      //       Center(
+      //         child: Image(
+      //           image: AssetImage('assets/images/faviconIU1.png'),
+      //           height: 40,
+      //           width: 40,
+      //         ),
+      //       ),
+      //       SizedBox(
+      //         width: 10,
+      //       ),
+      //       Center(
+      //         child: Text(
+      //           'Air Quality App',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 25,
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   shape: const RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.vertical(
+      //       bottom: Radius.circular(20),
+      //     ),
+      //   ),
+      // ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,71 +106,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 top: 5,
               ),
               child: SizedBox(
-                height: 100,
+                height: 80,
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
+                        // Padding(
+                        //   padding: EdgeInsets.only(
+                        //     top: 5,
+                        //   ),
+                        //   child: Icon(
+                        //     Icons.location_on_rounded,
+                        //     color: Colors.deepPurple,
+                        //     size: 35,
+                        //   ),
+                        // ),
                         Padding(
                           padding: EdgeInsets.only(
-                            top: 20,
-                          ),
-                          child: Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.blue,
-                            size: 30,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 20,
                             left: 2,
                           ),
                           child: Center(
-                              child: Text(
-                                  "Phu Nhuan District, Ho Chi Minh City",
-                                  style: TextStyle(fontSize: 20))),
+                              child: Text("Phu Nhuan District",
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontFamily: 'Kanit Regular 400'))),
                         ),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(
-                          Icons.calendar_today,
-                          color: Colors.blue,
-                          size: 30,
-                        ),
                         Padding(
                           padding: EdgeInsets.only(
                             left: 2,
                           ),
-                          child: Text("07/09/2023",
-                              style: TextStyle(fontSize: 20)),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 20,
-                          ),
-                          child: Text("|", style: TextStyle(fontSize: 30)),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 10,
-                          ),
-                          child: Icon(
-                            Icons.access_time,
-                            color: Colors.blue,
-                            size: 30,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 2,
-                          ),
-                          child:
-                              Text("15:23 PM", style: TextStyle(fontSize: 20)),
+                          child: Text("07 July 2023",
+                              style: TextStyle(
+                                  fontSize: 20, fontFamily: 'Kanit Light')),
                         ),
                       ],
                     ),
@@ -220,8 +194,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           'Predict',
                           style: TextStyle(
                               color: Colors.white,
-                              fontSize: 30,
-                              fontFamily: 'Arial',
+                              fontSize: 25,
+                              fontFamily: 'Kanit Medium 500',
                               fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
@@ -241,72 +215,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Container(
                 height: 150,
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: _airQualityIndex == "0"
+                      ? const Color.fromARGB(255, 190, 171, 171)
+                      : Colors.lightGreen,
                   border: Border.all(
-                    color: Colors.green,
-                    width: 2,
+                    color: Colors.black,
+                    width: 3,
                   ),
                   borderRadius: BorderRadius.circular(15),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black,
-                      offset: Offset.zero,
-                      blurRadius: 1,
-                      blurStyle: BlurStyle.outer,
-                    ),
-                  ],
                 ),
                 child: Row(
                   children: <Widget>[
-                    const Expanded(
-                        child: Image(
-                      image: AssetImage('assets/images/good.png'),
-                      height: 275,
-                      width: 275,
-                    )),
-                    Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        const Expanded(
-                          child: Text(
-                            "AQI",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 50,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            _airQualityIndex.toString(),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 50,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
+                    Expanded(
+                        child: _airQualityIndex == "0"
+                            ? const Icon(
+                                Icons.sentiment_satisfied_alt_outlined,
+                                color: Colors.black,
+                                size: 100,
+                              )
+                            : const Icon(
+                                Icons.sentiment_very_satisfied,
+                                color: Colors.black,
+                                size: 100,
+                              )),
+                    const VerticalDivider(
+                      color: Colors.black,
+                      thickness: 3,
+                      width: 20,
                     ),
                     Expanded(
-                      child: _airQualityIndex != "0" ? const Text(
-                        'Good',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 40,
-                            fontFamily: 'Arial',
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ) : const Text(
-                        'Loading...',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontFamily: 'Arial',
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
+                      child: _airQualityIndex != "0"
+                          ? Text(
+                              _airQualityIndex,
+                              style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 40,
+                                  fontFamily: 'Arial',
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            )
+                          : const Text(
+                              'NA',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 45,
+                                  fontFamily: 'Arial',
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                    ),
+                    //add a line between two expanded
+                    const VerticalDivider(
+                      color: Colors.black,
+                      thickness: 3,
+                      width: 20,
+                    ),
+                    Expanded(
+                      child: _airQualityIndex != "0"
+                          ? const Text(
+                              'Good',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 40,
+                                  fontFamily: 'Arial',
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            )
+                          : const Text(
+                              'Loading',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 28,
+                                  fontFamily: 'Arial',
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
                     ),
                   ],
                 ),
@@ -321,11 +304,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               child: const Text(
                 'Time series line chart',
-                style: TextStyle(fontSize: 23),
+                style: TextStyle(fontSize: 23, fontFamily: 'Kanit Regular 400'),
               ),
             ),
             Container(
-              margin: const EdgeInsets.only(left: 5),
+              margin: const EdgeInsets.only(left: 12),
               width: 350,
               height: 300,
               child: Chart(

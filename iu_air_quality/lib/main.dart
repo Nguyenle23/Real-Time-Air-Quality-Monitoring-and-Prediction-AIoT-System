@@ -11,16 +11,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'IU Air Quality',
-      theme: ThemeData(
-          primaryColor: Colors.blue,
-          inputDecorationTheme: const InputDecorationTheme(
-            labelStyle: TextStyle(color: Colors.black),
-            hintStyle: TextStyle(color: Colors.white),
-          )),
-      home: const HomeScreen(),
+      // theme: ThemeData(
+      //     inputDecorationTheme: const InputDecorationTheme(
+      //       labelStyle: TextStyle(color: Colors.black),
+      //       hintStyle: TextStyle(color: Colors.white),
+      //     )),
+      home: HomeScreen(),
       // home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }

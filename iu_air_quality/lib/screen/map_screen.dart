@@ -69,68 +69,68 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Center(
-              child: Image(
-                image: AssetImage('assets/images/faviconIU1.png'),
-                height: 30,
-                width: 30,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Center(
-              child: Text(
-                'Air Quality App',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            onPressed: toggleSearch,
-            icon: const Icon(Icons.search),
-          ),
-        ],
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
-        ),
-        bottom: _isSearchActive
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(50),
-                child: Container(
-                  margin: const EdgeInsets.all(10),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search',
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                        },
-                        icon: const Icon(Icons.clear),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : null,
-      ),
+      // appBar: AppBar(
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: const [
+      //       Center(
+      //         child: Image(
+      //           image: AssetImage('assets/images/faviconIU1.png'),
+      //           height: 30,
+      //           width: 30,
+      //         ),
+      //       ),
+      //       SizedBox(
+      //         width: 10,
+      //       ),
+      //       Center(
+      //         child: Text(
+      //           'Air Quality App',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 25,
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       onPressed: toggleSearch,
+      //       icon: const Icon(Icons.search),
+      //     ),
+      //   ],
+      //   shape: const RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.vertical(
+      //       bottom: Radius.circular(20),
+      //     ),
+      //   ),
+      //   bottom: _isSearchActive
+      //       ? PreferredSize(
+      //           preferredSize: const Size.fromHeight(50),
+      //           child: Container(
+      //             margin: const EdgeInsets.all(10),
+      //             child: TextField(
+      //               controller: _searchController,
+      //               decoration: InputDecoration(
+      //                 hintText: 'Search',
+      //                 suffixIcon: IconButton(
+      //                   onPressed: () {
+      //                     _searchController.clear();
+      //                   },
+      //                   icon: const Icon(Icons.clear),
+      //                 ),
+      //                 enabledBorder: OutlineInputBorder(
+      //                   borderRadius: BorderRadius.circular(10),
+      //                   borderSide:
+      //                       const BorderSide(color: Colors.white, width: 2),
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         )
+      //       : null,
+      // ),
       body: OSMFlutter(
         controller: _mapController,
         trackMyPosition: true,
@@ -197,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
           showBottomSheet(
               context: context,
               builder: (context) => Card(
-                  color: Colors.white70,
+                  color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -303,7 +303,7 @@ class _MapScreenState extends State<MapScreen> {
         marginEnd: 4,
         icon: Icons.menu,
         activeIcon: Icons.close,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.indigo[800],
         foregroundColor: Colors.white,
         activeBackgroundColor: const Color.fromARGB(255, 46, 38, 70),
         activeForegroundColor: Colors.white,

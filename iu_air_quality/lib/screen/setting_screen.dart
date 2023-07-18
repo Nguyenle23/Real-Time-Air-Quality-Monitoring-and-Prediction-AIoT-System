@@ -12,39 +12,39 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Center(
-              child: Image(
-                image: AssetImage('assets/images/faviconIU1.png'),
-                height: 40,
-                width: 40,
-                // color: Colors.white,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Center(
-              child: Text(
-                'Air Quality App',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                ),
-              ),
-            ),
-          ],
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: const [
+      //       Center(
+      //         child: Image(
+      //           image: AssetImage('assets/images/faviconIU1.png'),
+      //           height: 40,
+      //           width: 40,
+      //           // color: Colors.white,
+      //         ),
+      //       ),
+      //       SizedBox(
+      //         width: 10,
+      //       ),
+      //       Center(
+      //         child: Text(
+      //           'Air Quality App',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 25,
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   shape: const RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.vertical(
+      //       bottom: Radius.circular(20),
+      //     ),
+      //   ),
+      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(
           top: 20,

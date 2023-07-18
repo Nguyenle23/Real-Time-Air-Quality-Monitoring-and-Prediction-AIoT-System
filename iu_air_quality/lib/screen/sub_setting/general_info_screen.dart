@@ -12,57 +12,62 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: BackButton(
-          color: Colors.white,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingScreen(),
-              ),
-            );
-          },
-        ),
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: const [
-            // Center(
-            //   child: Image(
-            //     image: AssetImage('assets/images/faviconIU1.png'),
-            //     height: 40,
-            //     width: 40,
-            //   ),
-            // ),
+      // appBar: AppBar(
+      //   leading: BackButton(
+      //     color: Colors.white,
+      //     onPressed: () {
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //           builder: (context) => const SettingScreen(),
+      //         ),
+      //       );
+      //     },
+      //   ),
+      //   automaticallyImplyLeading: false,
+      //   title: Row(
+      //     mainAxisAlignment: MainAxisAlignment.start,
+      //     children: const [
+      //       // Center(
+      //       //   child: Image(
+      //       //     image: AssetImage('assets/images/faviconIU1.png'),
+      //       //     height: 40,
+      //       //     width: 40,
+      //       //   ),
+      //       // ),
             
-            Center(
-              child: Text(
-                'General Information',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                ),
-              ),
-            ),
-          ],
-        ),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
-        ),
-      ),
+      //       Center(
+      //         child: Text(
+      //           'General Information',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 25,
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   shape: const RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.vertical(
+      //       bottom: Radius.circular(20),
+      //     ),
+      //   ),
+      // ),
+      backgroundColor: Colors.indigo[800],
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: const [
             //About
+            SizedBox(
+              height: 40,
+            ),
             Text(
               'About',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             SizedBox(
@@ -71,6 +76,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               'This app is made by students of Computer Sciences, International University - Vietnam National University. This app is made for the thesis project',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 20,
@@ -79,6 +87,7 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
               image: AssetImage('assets/images/faviconIU.png'),
               height: 100,
               width: 100,
+              color: Colors.white,
             ),
             
             //Developers
@@ -90,6 +99,7 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             SizedBox(
@@ -98,6 +108,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               'Chair: Dr. Le Duy Tan',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 20,
@@ -105,6 +118,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               '1. Le Nguyen Binh Nguyen',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 10,
@@ -112,6 +128,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               '2. Truong Nhat Minh Quang',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 10,
@@ -123,6 +142,7 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             SizedBox(
@@ -131,6 +151,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               'The diagram below shows the mechanism of the app and how it works',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 20,
@@ -150,6 +173,7 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             SizedBox(
@@ -158,6 +182,9 @@ class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
             Text(
               'The diagram below shows the real system of the app',
               textAlign: TextAlign.justify,
+              style: TextStyle(
+                color: Colors.white,
+              ),
             ),
             SizedBox(
               height: 20,
