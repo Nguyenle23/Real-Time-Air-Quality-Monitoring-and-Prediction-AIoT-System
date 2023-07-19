@@ -195,7 +195,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 25,
-                              fontFamily: 'Kanit Medium 500',
                               fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
