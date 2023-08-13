@@ -47,7 +47,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/faviconIU1.png"
+  image_path: "assets/images/LogoAIoT.png"
 
 dev_dependencies:
   flutter_test:

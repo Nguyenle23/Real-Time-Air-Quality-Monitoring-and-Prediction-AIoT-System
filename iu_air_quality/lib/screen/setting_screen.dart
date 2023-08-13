@@ -12,6 +12,7 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       // appBar: AppBar(
       //   automaticallyImplyLeading: false,
       //   title: Row(
@@ -70,7 +71,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               child: Divider(
                 thickness: 2,
-                color: Color.fromARGB(255, 12, 21, 134),
+                color: Color.fromARGB(255, 8, 61, 26),
               ),
             ),
             Row(
@@ -184,7 +185,7 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               child: Divider(
                 thickness: 2,
-                color: Color.fromARGB(255, 12, 21, 134),
+                color: Color.fromARGB(255, 8, 61, 26),
               ),
             ),
             Row(
@@ -312,15 +313,15 @@ class _SettingScreenState extends State<SettingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
                 Image(
-                  image: AssetImage('assets/images/faviconIU1.png'),
-                  height: 60,
-                  width: 60,
+                  image: AssetImage('assets/images/LogoAIoT.png'),
+                  height: 95,
+                  width: 95,
                 ),
                 SizedBox(
                   height: 10,
                 ),
                 Text(
-                  'Version: 1.0.0',
+                  'Version: 0.0.1',
                   style: TextStyle(
                     fontSize: 20,
                   ),

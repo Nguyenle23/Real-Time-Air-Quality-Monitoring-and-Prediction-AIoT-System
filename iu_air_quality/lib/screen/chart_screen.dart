@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:graphic/graphic.dart';
 import 'package:flutter/gestures.dart';
+import 'package:graphic/graphic.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class ChartScreen extends StatefulWidget {
   const ChartScreen({super.key});
@@ -10,44 +14,59 @@ class ChartScreen extends StatefulWidget {
   State<ChartScreen> createState() => _ChartScreenState();
 }
 
+class AQIData {
+  final String time;
+  final String index;
+
+  AQIData(this.time, this.index);
+}
+
+final dataAIQ = [
+  AQIData("00:00", "00"),
+  AQIData("00:00", "00"),
+];
+
 class _ChartScreenState extends State<ChartScreen> {
   final _monthDayFormat = DateFormat('MM-dd');
+  var _airQualityIndex = '0';
+
+  Future<String> getStringData() async {
+    var url =
+        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1";
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {"Accept": "application/json"},
+    );
+    
+    return response.body;
+  }
+
+  getAirQualityIndex() async {
+    var data = await getStringData();
+    var jsonData = json.decode(data);
+    var getFeed = jsonData['feeds'];
+
+    for (var i = 0; i < getFeed.length; i++) {
+      String dateTimeString = getFeed[i]['created_at'];
+      DateTime dateTime = DateTime.parse(dateTimeString);
+      String collectedDate = DateFormat('HH:mm').format(dateTime).toString();
+      String indeAir = getFeed[i]['field1'];
+      addDataToAIQ(collectedDate, indeAir);
+    }
+
+    setState(() {
+      _airQualityIndex = getFeed[0]['field1'];
+    });
+  }
+
+    // draw chart
+  void addDataToAIQ(String date, String airQualityIndex) {
+    dataAIQ.add(AQIData(date, airQualityIndex));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: false,
-      //   title: Row(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: const [
-      //       Center(
-      //         child: Image(
-      //           image: AssetImage('assets/images/faviconIU1.png'),
-      //           height: 40,
-      //           width: 40,
-      //         ),
-      //       ),
-      //       SizedBox(
-      //         width: 10,
-      //       ),
-      //       Center(
-      //         child: Text(
-      //           'Air Quality App',
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //             fontSize: 25,
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      //   shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(
-      //       bottom: Radius.circular(20),
-      //     ),
-      //   ),
-      // ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,6 +115,68 @@ class _ChartScreenState extends State<ChartScreen> {
                 color: Color.fromARGB(255, 0, 0, 0),
               ),
             ),
+
+            // time-serie part
+            // Container(
+            //   padding: const EdgeInsets.only(
+            //     top: 20,
+            //     left: 20,
+            //   ),
+            //   child: const Text(
+            //     'Time series line chart',
+            //     style: TextStyle(fontSize: 23, fontFamily: 'Kanit Regular 400'),
+            //   ),
+            // ),
+            // Container(
+            //   margin: const EdgeInsets.only(left: 12),
+            //   width: 350,
+            //   height: 300,
+            //   child: Chart(
+            //     data: dataAIQ,
+            //     variables: {
+            //       'Time': Variable(
+            //         accessor: (AQIData e) => e.time,
+            //       ),
+            //       'Index': Variable(
+            //         accessor: (AQIData e) => e.index,
+            //       ),
+            //     },
+            //     marks: [
+            //       LineMark(
+            //         shape: ShapeEncode(
+            //             value: BasicLineShape(
+            //           smooth: true,
+            //         )),
+            //         selected: {
+            //           'touchMove': {1}
+            //         },
+            //       )
+            //     ],
+            //     coord: RectCoord(color: Colors.white),
+            //     axes: [
+            //       Defaults.horizontalAxis,
+            //       Defaults.verticalAxis,
+            //     ],
+            //     selections: {
+            //       'touchMove': PointSelection(
+            //         on: {
+            //           GestureType.scaleUpdate,
+            //           GestureType.tapDown,
+            //           GestureType.longPressMoveUpdate
+            //         },
+            //         dim: Dim.x,
+            //       )
+            //     },
+            //     tooltip: TooltipGuide(
+            //       followPointer: [false, true],
+            //       align: Alignment.topLeft,
+            //       offset: const Offset(-20, -20),
+            //     ),
+            //     crosshair: CrosshairGuide(followPointer: [false, true]),
+            //   ),
+            // ),
+            // const SizedBox(height: 20),
+            
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 100.0),
               child: const Text(

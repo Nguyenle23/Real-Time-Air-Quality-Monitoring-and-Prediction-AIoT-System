@@ -13,14 +13,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'IU Air Quality',
+      title: 'Air Quality Monitoring App',
       // theme: ThemeData(
       //     inputDecorationTheme: const InputDecorationTheme(
       //       labelStyle: TextStyle(color: Colors.black),
       //       hintStyle: TextStyle(color: Colors.white),
       //     )),
       home: HomeScreen(),
-      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

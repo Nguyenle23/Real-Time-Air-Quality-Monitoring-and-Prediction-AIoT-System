@@ -34,23 +34,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.indigo[800],
+        backgroundColor: Colors.green[800],
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            Center(
-              child: Image(
-                image: AssetImage('assets/images/faviconIU1.png'),
-                height: 40,
-                width: 40,
-              ),
-            ),
-            SizedBox(
-              width: 10,
-            ),
+            // Center(
+            //   child: Image(
+            //     image: AssetImage('assets/images/.png'),
+            //     height: 40,
+            //     width: 40,
+            //   ),
+            // ),
+            // SizedBox(
+            //   width: 10,
+            // ),
             Center(
               child: Text(
-                'Air Quality App',
+                'Air Quality Monitoring App',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 25,
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            backgroundColor: Colors.indigo[800],
+            backgroundColor: Colors.green[800],
             icon: const Icon(Icons.dashboard_outlined),
             label: 'Dashboard',
           ),

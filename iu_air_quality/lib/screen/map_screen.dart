@@ -36,7 +36,7 @@ class _MapScreenState extends State<MapScreen> {
   // get data from thingspeak
   Future<String> getThingspeakData() async {
     var url =
-        "https://api.thingspeak.com/channels/2044945/feeds.json?api_key=UMVXZ6J6YC9JPAVT&results=5";
+        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1";
     var response = await http.get(
       Uri.parse(url),
       headers: {"Accept": "application/json"},
@@ -69,68 +69,6 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Row(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: const [
-      //       Center(
-      //         child: Image(
-      //           image: AssetImage('assets/images/faviconIU1.png'),
-      //           height: 30,
-      //           width: 30,
-      //         ),
-      //       ),
-      //       SizedBox(
-      //         width: 10,
-      //       ),
-      //       Center(
-      //         child: Text(
-      //           'Air Quality App',
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //             fontSize: 25,
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       onPressed: toggleSearch,
-      //       icon: const Icon(Icons.search),
-      //     ),
-      //   ],
-      //   shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(
-      //       bottom: Radius.circular(20),
-      //     ),
-      //   ),
-      //   bottom: _isSearchActive
-      //       ? PreferredSize(
-      //           preferredSize: const Size.fromHeight(50),
-      //           child: Container(
-      //             margin: const EdgeInsets.all(10),
-      //             child: TextField(
-      //               controller: _searchController,
-      //               decoration: InputDecoration(
-      //                 hintText: 'Search',
-      //                 suffixIcon: IconButton(
-      //                   onPressed: () {
-      //                     _searchController.clear();
-      //                   },
-      //                   icon: const Icon(Icons.clear),
-      //                 ),
-      //                 enabledBorder: OutlineInputBorder(
-      //                   borderRadius: BorderRadius.circular(10),
-      //                   borderSide:
-      //                       const BorderSide(color: Colors.white, width: 2),
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //         )
-      //       : null,
-      // ),
       body: OSMFlutter(
         controller: _mapController,
         trackMyPosition: true,
@@ -149,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
           directionArrowMarker: const MarkerIcon(
             icon: Icon(
               Icons.location_on,
-              color: Colors.deepPurple,
+              color: Color.fromRGBO(100, 221, 23, 1),
               size: 120,
             ),
           ),
@@ -185,7 +123,7 @@ class _MapScreenState extends State<MapScreen> {
                 markerIcon: const MarkerIcon(
                   icon: Icon(
                     Icons.cloud_circle_rounded,
-                    color: Colors.blue,
+                    color: Colors.green,
                     size: 140,
                   ),
                 ),
@@ -220,7 +158,7 @@ class _MapScreenState extends State<MapScreen> {
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Text(
-                                        'AQI: 29 - Good',
+                                        'AQI: N/A',
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold),
@@ -231,7 +169,7 @@ class _MapScreenState extends State<MapScreen> {
                                 padding: EdgeInsets.symmetric(horizontal: 50.0),
                                 child: Divider(
                                   thickness: 2,
-                                  color: Color.fromARGB(255, 12, 21, 134),
+                                  color: Color.fromARGB(255, 15, 71, 7),
                                 ),
                               ),
                               Text(
@@ -250,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
                                 padding: EdgeInsets.symmetric(horizontal: 50.0),
                                 child: Divider(
                                   thickness: 2,
-                                  color: Color.fromARGB(255, 12, 21, 134),
+                                  color: Color.fromARGB(255, 15, 71, 7),
                                 ),
                               ),
                               Text(
@@ -303,7 +241,7 @@ class _MapScreenState extends State<MapScreen> {
         marginEnd: 4,
         icon: Icons.menu,
         activeIcon: Icons.close,
-        backgroundColor: Colors.indigo[800],
+        backgroundColor: Colors.green[800],
         foregroundColor: Colors.white,
         activeBackgroundColor: const Color.fromARGB(255, 46, 38, 70),
         activeForegroundColor: Colors.white,
