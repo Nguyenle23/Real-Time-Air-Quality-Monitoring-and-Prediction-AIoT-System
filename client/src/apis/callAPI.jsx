@@ -1,9 +1,15 @@
 import axios from "axios";
 
-const API_KEY = "UMVXZ6J6YC9JPAVT";
-export const getDataThingSpeak = async () => {
+export const getNewestDataThingSpeak = async () => {
   const response = await axios.get(
-    "https://api.thingspeak.com/channels/2044945/feeds.json?api_key=" + API_KEY + "&results=93"
+    "https://api.thingspeak.com/channels/2115707/feeds.json?results=1"
   );
   return response.data;
 };
+
+export const getDataOfDayThingSpeak = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+  );
+  return response;
+}

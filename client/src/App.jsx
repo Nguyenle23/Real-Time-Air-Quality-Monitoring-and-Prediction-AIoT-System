@@ -1,16 +1,17 @@
-import "./App.css";
 import Chart from "./components/charts/Chart";
 import Headers from "./components/header/Header";
-import SideBar from "./components/sidebar/SideBar";
+
+import "./App.css";
+import Navbar from "./components/navbar/Navbar";
 
 function App() {
   return (
     <>
-      <Headers />
+      <Navbar />
       <div className="container">
-        <SideBar />
         <Chart />
       </div>
+      <Headers />
     </>
   );
 }

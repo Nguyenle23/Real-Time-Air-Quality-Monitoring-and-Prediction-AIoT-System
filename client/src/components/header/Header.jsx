@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import "./Header.css";
 import tempIcon from "../../assets/temp-icon.png";
 import humiIcon from "../../assets/humi-icon.png";
 import co2Icon from "../../assets/co2-icon.png";
 import coIcon from "../../assets/co-icon.png";
 import dustIcon from "../../assets/dust-icon.png";
 import uvIcon from "../../assets/uv-icon.png";
-import mapIcon from "../../assets/map-icon.png";
-import { getDataThingSpeak } from "../../apis/callAPI";
+import locationMark from "../../assets/location.png";
+import { getNewestDataThingSpeak } from "../../apis/callAPI";
+
+import "./Header.css";
 
 const Header = () => {
   const [thingspeak, setThingspeak] = useState([]);
@@ -17,7 +18,7 @@ const Header = () => {
       icon: tempIcon,
       title: "Temperature",
       field: "field1",
-      level: "level",
+      level: "°C",
       width: "4rem",
       height: "4rem",
     },
@@ -26,7 +27,7 @@ const Header = () => {
       icon: humiIcon,
       title: "Humidity",
       field: "field2",
-      level: "level",
+      level: "%",
       width: "4rem",
       height: "4rem",
     },
@@ -35,7 +36,7 @@ const Header = () => {
       icon: co2Icon,
       title: "MQ135",
       field: "field3",
-      level: "level",
+      level: "PPM",
       width: "5rem",
       height: "5.5rem",
     },
@@ -44,7 +45,7 @@ const Header = () => {
       icon: coIcon,
       title: "MQ7",
       field: "field4",
-      level: "level",
+      level: "PPM",
       width: "4rem",
       height: "4rem",
     },
@@ -53,7 +54,7 @@ const Header = () => {
       icon: dustIcon,
       title: "PM2.5",
       field: "field5",
-      level: "level",
+      level: "µg m3",
       width: "4.5rem",
       height: "4.5rem",
     },
@@ -62,7 +63,7 @@ const Header = () => {
       icon: uvIcon,
       title: "UV Index",
       field: "field6",
-      level: "level",
+      level: "",
       width: "4.5rem",
       height: "4.5rem",
     },
@@ -70,57 +71,60 @@ const Header = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const data = await getDataThingSpeak();
+      const data = await getNewestDataThingSpeak();
       var getFeeds = data.feeds;
       setThingspeak(getFeeds);
     };
-
     getData();
-
-    // const interval = setInterval(() => {
-    //   getData();
-    //   console.log("Refresh");
-    // }, 30000);
-
-    // return () => clearInterval(interval);
   }, []);
+
+  const formatStringtoTime = (str) => {
+    var date = new Date(str);
+    var hour = date.getUTCHours();
+    var minute = date.getUTCMinutes();
+    var second = date.getUTCSeconds();
+    hour = hour < 10 ? `0${hour}` : hour;
+    minute = minute < 10 ? `0${minute}` : minute;
+    second = second < 10 ? `0${second}` : second;
+
+    //check if the time is AM or PM
+    const midday = hour >= 12 ? "PM" : "AM";
+    hour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+    return `${hour}:${minute}:${second} ${midday}`;
+  };
 
   return (
     <div className="header">
-      <div className="nav-links-left">
-        <div className="nav-item-left">
-          <div className="image-left">
-            <img
-              style={{ width: "6rem", height: "5rem" }}
-              src={mapIcon}
-              alt="icon"
-            />
-          </div>
-          <div className="info-right">
-            <h4>District</h4>
-            <span>Phu Nhuan</span>
-            <h4>Ho Chi Minh City</h4>
-          </div>
-        </div>
+      <div className="location">
+        <img className="location-icon" src={locationMark} alt="icon" />
+        <h3 className="location-text">
+          {formatStringtoTime(
+            thingspeak[0] ? thingspeak[0].created_at : "Loading..."
+          )}{" "}
+          | Phu Nhuan District, Ho Chi Minh City
+        </h3>
       </div>
-      <ul className="nav-links-right">
-        {keyData.map((data) => (
-          <li key={data.index} className="nav-item-right">
-            <img
-              src={data.icon}
-              style={{ width: data.width, height: data.height }}
-              alt="icon"
-            />
-            <div className="column-right">
-              <h5>{data.title}</h5>
-              <span>
-                {thingspeak[19] ? thingspeak[19][data.field] : "Loading..."}
-              </span>
-              <h4>{data.level}</h4>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="header-container">
+        <ul className="figure-list">
+          {keyData.map((data) => (
+            <li key={data.index} className="list-item">
+              <img className="icon" src={data.icon} alt="icon" />
+              <div className="list-item-detail">
+                <h4 className="list-item-title">{data.title}</h4>
+                <span className="list-item-number">
+                  <span>
+                    {thingspeak[0]
+                      ? Math.round(thingspeak[0][data.field] * 1000) / 1000
+                      : "Loading..."}
+                  </span>
+                  <span className="list-item-level">{data.level}</span>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
