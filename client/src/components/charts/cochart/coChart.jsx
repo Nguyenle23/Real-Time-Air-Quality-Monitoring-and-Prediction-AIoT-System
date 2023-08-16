@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
-import "./TempChart.css";
+import "./coChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { getDataOfDayThingSpeak } from "../../../apis/callAPI";
+import { getDataOfCOThingSpeak, predictCO } from "../../../apis/callAPI";
 
-const TempChart = () => {
+import * as tf from "@tensorflow/tfjs";
+import { loadGraphModel } from "@tensorflow/tfjs-converter";
+// import ModelTest  from "../../../../public/model.json";
+
+const COChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
   const [predictData, setPredictData] = useState({
     seriesData: [],
     timeData: [],
   });
   const [checkPredict, setCheckPredict] = useState(false);
-
+  console.log(predictData);
   const currentDate = new Date();
   const formatDate = (date) => {
     let day = date.getDate();
@@ -25,18 +29,25 @@ const TempChart = () => {
     switch (dayOfWeek) {
       case 0:
         dayOfWeekName = "Sunday";
+        break;
       case 1:
         dayOfWeekName = "Monday";
+        break;
       case 2:
         dayOfWeekName = "Tuesday";
+        break;
       case 3:
         dayOfWeekName = "Wednesday";
+        break;
       case 4:
         dayOfWeekName = "Thursday";
+        break;
       case 5:
         dayOfWeekName = "Friday";
+        break;
       case 6:
         dayOfWeekName = "Saturday";
+        break;
     }
 
     if (day < 10) day = `0${day}`;
@@ -50,7 +61,7 @@ const TempChart = () => {
       enabled: false,
     },
     title: {
-      text: `Real-time data of Temperature on ${formatDate(currentDate)}`,
+      text: `Real-time data of CO values on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -78,12 +89,15 @@ const TempChart = () => {
       },
     },
     yAxis: {
-      min: 0,
-      tickInterval: 10,
-      categories: chartData.seriesData,
+      labels: {
+        formatter: function () {
+          return this.value;
+        },
+      },
+      reversed: false,
       title: {
         x: -16,
-        text: "Temperature (°C)",
+        text: "CO Values (ppm)",
       },
     },
     responsive: {
@@ -138,7 +152,7 @@ const TempChart = () => {
       enabled: false,
     },
     title: {
-      text: `Predicted data of Temperature for next hour on ${formatDate(
+      text: `Predicted data of CO Values for next hour on ${formatDate(
         currentDate
       )}`,
     },
@@ -167,12 +181,15 @@ const TempChart = () => {
       },
     },
     yAxis: {
-      min: 0,
-      tickInterval: 10,
-      categories: predictData.seriesData,
+      labels: {
+        formatter: function () {
+          return this.value;
+        },
+      },
+      reversed: false,
       title: {
         x: -16,
-        text: "Temperature (°C)",
+        text: "CO Values (ppm)",
       },
     },
     responsive: {
@@ -213,32 +230,144 @@ const TempChart = () => {
     setCheckPredict(false);
   };
 
-  const predictFunction = () => {
-    const predictData = async () => {
-      // const startDate = "2023-08-10%2000:00:00";
-      // const endDate = "2023-08-10%2023:59:00";
-      // const result = await axios.get(
-      //   "https://api.thingspeak.com/channels/2115707/fields/1.json?api_key=8XAK02XOFU2XN9AV&timezone=Asia%2Bangkok&results=288&start=" +
-      //     startDate +
-      //     "&end=" +
-      //     endDate
-      // );
-      // const data = result.data.feeds.map((item) => parseFloat(item.field1));
+  const predictFunction = async () => {
+    const formatUTCDateStart = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2000:00:00`;
+    const formatUTCDateEnd = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2023:59:00`;
+    const result = await getDataOfCOThingSpeak(
+      formatUTCDateStart,
+      formatUTCDateEnd
+    );
+    const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
-      // const time = result.data.feeds.map((item) => {
-      //   const date = new Date(item.created_at);
-      //   return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
-      //     date.getUTCMinutes()
-      //   ).padStart(2, "0")}`;
-      // });
+    const time = result.data.feeds.map((item) => {
+      const date = new Date(item.created_at);
+      return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
+        date.getUTCMinutes()
+      ).padStart(2, "0")}`;
+    });
 
-      const data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-      const time = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    //next hour based on time of last data point
+    const nextHour = new Date(
+      result.data.feeds[result.data.feeds.length - 1].created_at
+    );
+    nextHour.setHours(nextHour.getHours() + 1);
+    const nextHourString = `${String(nextHour.getUTCHours()).padStart(
+      2,
+      "0"
+    )}:${String(nextHour.getUTCMinutes()).padStart(2, "0")}`;
+    time.push(nextHourString);
 
-      setPredictData({ seriesData: data, timeData: time });
-    };
-    predictData();
+    const dataTemp = await predictCO(data);
+    const resultPredict = dataTemp.data;
+
+    //time for predict data
+    const timeTemp = new Date(nextHour);
+    timeTemp.setHours(timeTemp.getHours() + 1);
+    const timeTempString = `${String(timeTemp.getUTCHours()).padStart(
+      2,
+      "0"
+    )}:${String(timeTemp.getUTCMinutes()).padStart(2, "0")}`;
+    time.push(timeTempString);
+
     setCheckPredict(true);
+    setPredictData({
+      timeData: time,
+      seriesData: data.concat(resultPredict),
+    });
+
+    // const originalArray = [
+    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
+    // ];
+
+    // const modelLSTM = await tf.loadGraphModel("src/model.json");
+    // console.log(modelLSTM);
+
+    // const windowSize = 12;
+    // const numWindows = originalArray.length - windowSize + 1;
+
+    // const dataBatches = [];
+    // for (let i = 0; i < numWindows; i++) {
+    //   const batch = originalArray.slice(i, i + windowSize);
+    //   dataBatches.push(batch);
+    // }
+
+    // console.log(dataBatches.length, dataBatches[0].length);
+
+    // // Convert to TensorFlow.js tensor
+    // const tensorDataBatches = dataBatches.map((batch) =>
+    //   tf.tensor2d(batch, [1, windowSize])
+    // );
+
+    // console.log(tensorDataBatches.length, tensorDataBatches[0].shape);
+
+    // // Reshape tensors to [1, 12, 1]
+    // const reshapedTensors = tensorDataBatches.map((tensor) =>
+    //   tensor.reshape([1, windowSize, 1])
+    // );
+
+    // console.log(reshapedTensors.length, reshapedTensors[0].shape);
+
+    // // Predict.executeAsync
+    // const predictions = modelLSTM.executeAsync(reshapedTensors);
+
+    /////--------------------------------------nay model web
+    // const originalArray = [
+    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
+    // ];
+    // console.log(originalArray.length);
+
+    // const windowSize = 12;
+    // const numWindows = originalArray.length - windowSize + 1;
+
+    // const dataBatches = [];
+    // for (let i = 0; i < numWindows; i++) {
+    //   const batch = originalArray.slice(i, i + windowSize);
+    //   dataBatches.push(batch);
+    // }
+
+    // console.log(dataBatches.length, dataBatches[0].length);
+
+    // // Convert to TensorFlow.js tensor
+    // const tensorDataBatches = dataBatches.map((batch) =>
+    //   tf.tensor2d(batch, [windowSize, 1])
+    // );
+
+    // const model1 = tf.sequential();
+    // model1.add(tf.layers.lstm({ units: 8, inputShape: [windowSize, 1] }));
+    // model1.add(tf.layers.dense({ units: 1 }));
+
+    // tensorDataBatches.forEach((tensorBatch) => {
+    //   const input = tensorBatch.reshape([1, windowSize, 1]);
+    //   const output = model1.predict(input);
+    //   input.print();
+    //   output.print();
+    //   //inverse transform to get the original data
+    //   const originalData = output.mul(0.1).add(34.6);
+    //   originalData.print();
+    // });
+
+    // // const predictions = model.predict(inputTensor).dataSync();
+    // // console.log(predictions);
+
+    // // const predict = model.predict(tf.tensor2d([reshapedData])).dataSync();
+
+    // const predictData = {
+    //   timeData: time,
+    //   // seriesData: data.concat(predictions[0]),
+    // };
+
+    // setPredictData(predictData);
+    // setCheckPredict(true);
   };
 
   useEffect(() => {
@@ -256,12 +385,12 @@ const TempChart = () => {
         "0"
       )}%2023:59:00`;
 
-      const result = await getDataOfDayThingSpeak(
+      const result = await getDataOfCOThingSpeak(
         formatUTCDateStart,
         formatUTCDateEnd
       );
 
-      const data = result.data.feeds.map((item) => parseFloat(item.field1));
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
@@ -329,4 +458,4 @@ const TempChart = () => {
   );
 };
 
-export default TempChart;
+export default COChart;

@@ -7,9 +7,16 @@ export const getNewestDataThingSpeak = async () => {
   return response.data;
 };
 
-export const getDataOfDayThingSpeak = async (start, end) => {
+export const getDataOfCOThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/4.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
   );
   return response;
-}
+};
+
+export const predictCO = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/co", {
+    dataCO: data,
+  });
+  return response;
+};

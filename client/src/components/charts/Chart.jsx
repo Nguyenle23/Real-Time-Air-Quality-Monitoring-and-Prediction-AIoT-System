@@ -1,11 +1,11 @@
 import "./Chart.css";
-import TempChart from "./tempchart/TempChart";
+import COChart from "./cochart/coChart";
 
 const Chart = () => {
   return (
     <div className="general-container">
       <div className="full-chart">
-        <TempChart />
+        <COChart />
       </div>
     </div>
   );
