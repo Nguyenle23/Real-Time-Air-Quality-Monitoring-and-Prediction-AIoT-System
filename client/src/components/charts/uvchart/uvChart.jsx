@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "./coChart.css";
+import "./uvChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { getDataOfCOThingSpeak, predictCO } from "../../../apis/callAPI";
+import { getDataOfUVThingSpeak, predictUV } from "../../../apis/callAPI";
 
-import * as tf from "@tensorflow/tfjs";
-import { loadGraphModel } from "@tensorflow/tfjs-converter";
-// import ModelTest  from "../../../../public/model.json";
-
-const COChart = () => {
+const UVChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
   const [predictData, setPredictData] = useState({
     seriesData: [],
@@ -63,7 +59,7 @@ const COChart = () => {
       enabled: false,
     },
     title: {
-      text: `Real-time data of CO values on ${formatDate(currentDate)}`,
+      text: `Real-time data of UV index on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -99,7 +95,7 @@ const COChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO Values (ppm)",
+        text: "UV Index",
       },
     },
     responsive: {
@@ -117,11 +113,6 @@ const COChart = () => {
       ],
     },
     plotOptions: {
-      // line: {
-      //   dataLabels: {
-      //     enabled: true,
-      //   },
-      // },
       marker: {
         radius: 2,
       },
@@ -154,7 +145,7 @@ const COChart = () => {
       enabled: false,
     },
     title: {
-      text: `Predicted data of CO Values for next hour on ${formatDate(
+      text: `Predicted data of UV index for next hour on ${formatDate(
         currentDate
       )}`,
     },
@@ -191,7 +182,7 @@ const COChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO Values (ppm)",
+        text: "UV Index",
       },
     },
     responsive: {
@@ -245,11 +236,11 @@ const COChart = () => {
       2,
       "0"
     )}%2023:59:00`;
-    const result = await getDataOfCOThingSpeak(
+    const result = await getDataOfUVThingSpeak(
       formatUTCDateStart,
       formatUTCDateEnd
     );
-    const data = result.data.feeds.map((item) => parseFloat(item.field4));
+    const data = result.data.feeds.map((item) => parseFloat(item.field5));
 
     const time = result.data.feeds.map((item) => {
       const date = new Date(item.created_at);
@@ -269,7 +260,7 @@ const COChart = () => {
     )}:${String(nextHour.getUTCMinutes()).padStart(2, "0")}`;
     time.push(nextHourString);
 
-    const dataTemp = await predictCO(data);
+    const dataTemp = await predictUV(data);
     const resultPredict = dataTemp.data;
 
     //time for predict data
@@ -286,90 +277,6 @@ const COChart = () => {
       timeData: time,
       seriesData: data.concat(resultPredict),
     });
-
-    // const originalArray = [
-    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
-    // ];
-
-    // const modelLSTM = await tf.loadGraphModel("src/model.json");
-    // console.log(modelLSTM);
-
-    // const windowSize = 12;
-    // const numWindows = originalArray.length - windowSize + 1;
-
-    // const dataBatches = [];
-    // for (let i = 0; i < numWindows; i++) {
-    //   const batch = originalArray.slice(i, i + windowSize);
-    //   dataBatches.push(batch);
-    // }
-
-    // console.log(dataBatches.length, dataBatches[0].length);
-
-    // // Convert to TensorFlow.js tensor
-    // const tensorDataBatches = dataBatches.map((batch) =>
-    //   tf.tensor2d(batch, [1, windowSize])
-    // );
-
-    // console.log(tensorDataBatches.length, tensorDataBatches[0].shape);
-
-    // // Reshape tensors to [1, 12, 1]
-    // const reshapedTensors = tensorDataBatches.map((tensor) =>
-    //   tensor.reshape([1, windowSize, 1])
-    // );
-
-    // console.log(reshapedTensors.length, reshapedTensors[0].shape);
-
-    // // Predict.executeAsync
-    // const predictions = modelLSTM.executeAsync(reshapedTensors);
-
-    /////--------------------------------------nay model web
-    // const originalArray = [
-    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
-    // ];
-    // console.log(originalArray.length);
-
-    // const windowSize = 12;
-    // const numWindows = originalArray.length - windowSize + 1;
-
-    // const dataBatches = [];
-    // for (let i = 0; i < numWindows; i++) {
-    //   const batch = originalArray.slice(i, i + windowSize);
-    //   dataBatches.push(batch);
-    // }
-
-    // console.log(dataBatches.length, dataBatches[0].length);
-
-    // // Convert to TensorFlow.js tensor
-    // const tensorDataBatches = dataBatches.map((batch) =>
-    //   tf.tensor2d(batch, [windowSize, 1])
-    // );
-
-    // const model1 = tf.sequential();
-    // model1.add(tf.layers.lstm({ units: 8, inputShape: [windowSize, 1] }));
-    // model1.add(tf.layers.dense({ units: 1 }));
-
-    // tensorDataBatches.forEach((tensorBatch) => {
-    //   const input = tensorBatch.reshape([1, windowSize, 1]);
-    //   const output = model1.predict(input);
-    //   input.print();
-    //   output.print();
-    //   //inverse transform to get the original data
-    //   const originalData = output.mul(0.1).add(34.6);
-    //   originalData.print();
-    // });
-
-    // // const predictions = model.predict(inputTensor).dataSync();
-    // // console.log(predictions);
-
-    // // const predict = model.predict(tf.tensor2d([reshapedData])).dataSync();
-
-    // const predictData = {
-    //   timeData: time,
-    //   // seriesData: data.concat(predictions[0]),
-    // };
-
-    // setPredictData(predictData);
-    // setCheckPredict(true);
   };
 
   useEffect(() => {
@@ -387,12 +294,12 @@ const COChart = () => {
         "0"
       )}%2023:59:00`;
 
-      const result = await getDataOfCOThingSpeak(
+      const result = await getDataOfUVThingSpeak(
         formatUTCDateStart,
         formatUTCDateEnd
       );
 
-      const data = result.data.feeds.map((item) => parseFloat(item.field4));
+      const data = result.data.feeds.map((item) => parseFloat(item.field5));
 
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
@@ -402,26 +309,6 @@ const COChart = () => {
       });
 
       setChartData({ seriesData: data, timeData: time });
-      // const fields = _.pickBy(result.data.channel, (value, key) =>
-      //   key.includes("field")
-      // );
-
-      // const newData = { seriesData: [], timeData: [] };
-
-      // _.forOwn(fields, (name, key) => {
-      //   newData.seriesData.push({
-      //     name,
-      //     data: result.data.feeds.map((item) => parseFloat(item[key])),
-      //   });
-      // });
-
-      // result.data.feeds.map((item) => {
-      //   const dateObject = new Date(item.created_at);
-      //   const hour = String(dateObject.getUTCHours()).padStart(2, "0");
-      //   const minute = String(dateObject.getUTCMinutes()).padStart(2, "0");
-      //   const formattedTime = `${hour}:${minute}`;
-      //   newData.timeData.push(formattedTime);
-      // });
     };
     fetchData();
     setInterval(fetchData, 5 * 60 * 1000);
@@ -462,4 +349,4 @@ const COChart = () => {
   );
 };
 
-export default COChart;
+export default UVChart;
