@@ -18,9 +18,9 @@ class PredictController:
       script_dir = os.path.dirname(os.path.abspath(__file__))
       server_dir = os.path.dirname(os.path.dirname(script_dir))
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/model_pm25.h5')
-      model_json_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/model_pm25.json')
-      scaler_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/scalerPM25.joblib')
+      model_path = os.path.join(server_dir, 'server/datasets/models/predictTemp/model_temp.h5')
+      model_json_path = os.path.join(server_dir, 'server/datasets/models/predictTemp/model_temp.json')
+      scaler_path = os.path.join(server_dir, 'server/datasets/models/predictTemp/scalerTemp.joblib')
 
       if os.path.exists(model_path) and os.path.exists(model_json_path):
         json_file = open(model_json_path, 'r')
@@ -58,9 +58,9 @@ class PredictController:
       script_dir = os.path.dirname(os.path.abspath(__file__))
       server_dir = os.path.dirname(os.path.dirname(script_dir))
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/model_pm25.h5')
-      model_json_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/model_pm25.json')
-      scaler_path = os.path.join(server_dir, 'server/datasets/models/predictPM25/scalerPM25.joblib')
+      model_path = os.path.join(server_dir, 'server/datasets/models/predictHumi/model_humi.h5')
+      model_json_path = os.path.join(server_dir, 'server/datasets/models/predictHumi/model_humi.json')
+      scaler_path = os.path.join(server_dir, 'server/datasets/models/predictHumi/scalerHumi.joblib')
 
       if os.path.exists(model_path) and os.path.exists(model_json_path):
         json_file = open(model_json_path, 'r')
