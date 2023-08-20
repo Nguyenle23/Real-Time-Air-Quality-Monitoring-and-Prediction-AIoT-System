@@ -80,7 +80,7 @@ const PM25Chart = () => {
       type: "datetime",
       categories: chartData.timeData,
       title: {
-        text: "Hour (UTC)",
+        text: "Hour (UTC+7)",
       },
       labels: {
         step: 12,
@@ -159,7 +159,7 @@ const PM25Chart = () => {
       type: "datetime",
       categories: predictData.timeData,
       title: {
-        text: "Hour (UTC)",
+        text: "Hour (UTC+7)",
       },
       labels: {
         step: 12,
@@ -234,35 +234,59 @@ const PM25Chart = () => {
     );
     const data = result.data.feeds.map((item) => parseFloat(item.field6));
 
+    const getAmPm = (hour) => {
+      return hour >= 12 ? "PM" : "AM";
+    };
+
     const time = result.data.feeds.map((item) => {
       const date = new Date(item.created_at);
-      return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
-        date.getUTCMinutes()
-      ).padStart(2, "0")}`;
+
+      // Convert UTC time to Asia/Bangkok time zone
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(date);
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+      const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+      const amPm = getAmPm(hour);
+
+      return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
     });
 
     //next hour based on time of last data point
-    const nextHour = new Date(
+    const lastDataPointTime = new Date(
       result.data.feeds[result.data.feeds.length - 1].created_at
     );
-    nextHour.setHours(nextHour.getHours() + 1);
-    const nextHourString = `${String(nextHour.getUTCHours()).padStart(
+
+    const options = {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+
+    const formatter = new Intl.DateTimeFormat("en-US", options);
+    const bangkokTime = formatter.format(lastDataPointTime);
+
+    const [hours, minutes] = bangkokTime.split(":").map(Number);
+    const nextHour = new Date(lastDataPointTime);
+    nextHour.setHours(hours + 1, minutes);
+
+    const nextHourBangkokTime = `${String(nextHour.getHours()).padStart(
       2,
       "0"
-    )}:${String(nextHour.getUTCMinutes()).padStart(2, "0")}`;
-    time.push(nextHourString);
+    )}:${String(nextHour.getMinutes()).padStart(2, "0")}`;
+
+    time.push(nextHourBangkokTime);
 
     const dataTemp = await predictPM25(data);
     const resultPredict = dataTemp.data;
-
-    //time for predict data
-    const timeTemp = new Date(nextHour);
-    timeTemp.setHours(timeTemp.getHours() + 1);
-    const timeTempString = `${String(timeTemp.getUTCHours()).padStart(
-      2,
-      "0"
-    )}:${String(timeTemp.getUTCMinutes()).padStart(2, "0")}`;
-    time.push(timeTempString);
 
     setCheckPredict(true);
     setPredictData({
@@ -293,11 +317,29 @@ const PM25Chart = () => {
 
       const data = result.data.feeds.map((item) => parseFloat(item.field6));
 
+      const getAmPm = (hour) => {
+        return hour >= 12 ? "PM" : "AM";
+      };
+
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
-        return `${String(date.getUTCHours()).padStart(2, "0")}:${String(
-          date.getUTCMinutes()
-        ).padStart(2, "0")}`;
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
       });
 
       setChartData({ seriesData: data, timeData: time });

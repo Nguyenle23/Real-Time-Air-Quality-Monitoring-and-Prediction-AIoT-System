@@ -12,6 +12,7 @@ import "./Header.css";
 
 const Header = () => {
   const [thingspeak, setThingspeak] = useState([]);
+  const [time, setTime] = useState("");
   const keyData = [
     {
       index: "1",
@@ -51,19 +52,19 @@ const Header = () => {
     },
     {
       index: "5",
-      icon: dustIcon,
-      title: "PM2.5",
-      field: "field5",
-      level: "µg m3",
+      icon: uvIcon,
+      title: "UV Index",
+      field: "field6",
+      level: "",
       width: "4.5rem",
       height: "4.5rem",
     },
     {
       index: "6",
-      icon: uvIcon,
-      title: "UV Index",
-      field: "field6",
-      level: "",
+      icon: dustIcon,
+      title: "PM2.5",
+      field: "field5",
+      level: "µg m3",
       width: "4.5rem",
       height: "4.5rem",
     },
@@ -74,24 +75,44 @@ const Header = () => {
       const data = await getNewestDataThingSpeak();
       var getFeeds = data.feeds;
       setThingspeak(getFeeds);
+      setTime(getFeeds[0].created_at);
     };
     getData();
   }, []);
 
   const formatStringtoTime = (str) => {
-    var date = new Date(str);
-    var hour = date.getUTCHours();
-    var minute = date.getUTCMinutes();
-    var second = date.getUTCSeconds();
-    hour = hour < 10 ? `0${hour}` : hour;
-    minute = minute < 10 ? `0${minute}` : minute;
-    second = second < 10 ? `0${second}` : second;
 
-    //check if the time is AM or PM
-    const midday = hour >= 12 ? "PM" : "AM";
-    hour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    console.log(str)
+    // var date = new Date(str);
+    // var hour = date.getUTCHours();
+    // var minute = date.getUTCMinutes();
+    // var second = date.getUTCSeconds();
+    // hour = hour < 10 ? `0${hour}` : hour;
+    // minute = minute < 10 ? `0${minute}` : minute;
+    // second = second < 10 ? `0${second}` : second;
 
-    return `${hour}:${minute}:${second} ${midday}`;
+    // //check if the time is AM or PM
+    // const midday = hour >= 12 ? "PM" : "AM";
+    // hour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+
+    // return `${hour}:${minute}:${second} ${midday}`;
+    const options = {
+      timeZone: "Asia/Bangkok",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    };
+  
+    const date = new Date(str);
+    const formatter = new Intl.DateTimeFormat("en-US", options);
+    const bangkokTime = formatter.format(date);
+  
+    const hour = date.getHours();
+    const amPm = hour >= 12 ? "PM" : "AM";
+    const adjustedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  
+    return `${adjustedHour}:${bangkokTime.slice(3)}:${amPm}`;
   };
 
   return (
@@ -99,10 +120,8 @@ const Header = () => {
       <div className="location">
         <img className="location-icon" src={locationMark} alt="icon" />
         <h3 className="location-text">
-          {formatStringtoTime(
-            thingspeak[0] ? thingspeak[0].created_at : "Loading..."
-          )}{" "}
-          | Phu Nhuan District, Ho Chi Minh City
+          {time ? formatStringtoTime(time) + " | " : " Loading ...| "}
+          Phu Nhuan District, Ho Chi Minh City
         </h3>
       </div>
       <div className="header-container">

@@ -1,4 +1,5 @@
 import axios from "axios";
+const timezone = "Asia%2FBangkok";
 
 export const getNewestDataThingSpeak = async () => {
   const response = await axios.get(
@@ -10,7 +11,7 @@ export const getNewestDataThingSpeak = async () => {
 //------------Temperature----------------
 export const getDataOfTempThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
@@ -25,7 +26,7 @@ export const predictTemp = async (data) => {
 //------------Humidity----------------
 export const getDataOfHumiThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
@@ -40,7 +41,7 @@ export const predictHumi = async (data) => {
 //------------CO2----------------
 export const getDataOfCO2ThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/3.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/3.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
@@ -55,7 +56,7 @@ export const predictCO2 = async (data) => {
 //------------CO----------------
 export const getDataOfCOThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/4.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/4.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
@@ -70,7 +71,7 @@ export const predictCO = async (data) => {
 //------------UV----------------
 export const getDataOfUVThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/5.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/5.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
@@ -85,7 +86,7 @@ export const predictUV = async (data) => {
 //------------PM2.5----------------
 export const getDataOfPM25ThingSpeak = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/6.json?timezone=Asia%2Bangkok&results=288&start=${start}&end=${end}`
+    `https://api.thingspeak.com/channels/2115707/fields/6.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
   );
   return response;
 };
