@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:graphic/graphic.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:timezone/timezone.dart' as tz;
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -39,7 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // get data from thingspeak
   getStringData() async {
     var url =
-        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1";
+        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1&timezone=Asia%2FBangkok";
     var response = await http.get(
       Uri.parse(url),
       headers: {"Accept": "application/json"},
@@ -48,6 +49,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     var data = response.body;
     var jsonData = json.decode(data);
     var getFeed = jsonData['feeds'];
+
+    double tempValue = double.parse(getFeed[0]['field1']);
+    double humiValue = double.parse(getFeed[0]['field2']);
+    double co2Value = double.parse(getFeed[0]['field3']);
+    double coValue = double.parse(getFeed[0]['field4']);
+    double pm25Value = double.parse(getFeed[0]['field5']);
+    double uvValue = double.parse(getFeed[0]['field6']);
+
+    String formattedTemp = tempValue.toStringAsFixed(1);
+    String formattedHumi = humiValue.toStringAsFixed(1);
+    String formattedCO2 = co2Value.toStringAsFixed(4);
+    String formattedCO = coValue.toStringAsFixed(4);
+    String formattedPM25 = pm25Value.toStringAsFixed(4);
+    String formattedUV = uvValue.toStringAsFixed(4);
 
     // for (var i = 0; i < getFeed.length; i++) {
     //   String dateTimeString = getFeed[i]['created_at'];
@@ -58,24 +73,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     //formate date
     String dateTimeString = getFeed[0]['created_at'];
-    DateTime dateTime = DateTime.parse(dateTimeString);
+    DateTime dateTime =
+        DateTime.parse(dateTimeString).toLocal(); // Convert to local time
     String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
 
-    //get the day of week from date
-    String dayOfWeek = DateFormat('EEEE').format(dateTime).toString();
+    // Load the Asia/Bangkok time zone
+    tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
 
-    //check if AM or PM
-    String amPm = DateFormat('a').format(dateTime).toString();
+    // Convert the DateTime to Asia/Bangkok time zone
+    tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
+
+    // Get the day of the week in Asia/Bangkok time zone
+    String dayOfWeek =
+        DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
+
+    //get the day-month-year in Asia/Bangkok time zone
+    String day =
+        DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
+
+    // Format AM or PM in Asia/Bangkok time zone
+    String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
 
     setState(() {
       _airQualityData = AirQualityData(
-          tempValue: getFeed[0]['field1'],
-          humiValue: getFeed[0]['field2'],
-          co2Value: getFeed[0]['field3'],
-          coValue: getFeed[0]['field4'],
-          pm25Value: getFeed[0]['field5'],
-          uvValue: getFeed[0]['field6'],
-          date: "$dayOfWeek, $collectedDate $amPm");
+          tempValue: formattedTemp,
+          humiValue: formattedHumi,
+          co2Value: formattedCO2,
+          coValue: formattedCO,
+          pm25Value: formattedPM25,
+          uvValue: formattedUV,
+          date: "$day || $dayOfWeek || $collectedDate $amPm");
     });
   }
 
@@ -121,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           child: Icon(
                             Icons.location_on_rounded,
-                            color: Colors.blueGrey,
+                            color: Colors.green,
                             size: 35,
                           ),
                         ),
@@ -164,106 +191,110 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
 
-            //button refresh
-            // Padding(
-            //   padding: const EdgeInsets.only(
-            //     bottom: 10,
-            //     left: 100,
-            //     right: 100,
-            //   ),
-            //   child: Container(
-            //     height: 50,
-            //     decoration: BoxDecoration(
-            //       color: Colors.black,
-            //       border: Border.all(
-            //         color: Colors.black,
-            //         width: 2,
-            //       ),
-            //       borderRadius: BorderRadius.circular(15),
-            //       boxShadow: const [
-            //         BoxShadow(
-            //           color: Colors.black,
-            //           offset: Offset.zero,
-            //           blurRadius: 1,
-            //           blurStyle: BlurStyle.outer,
-            //         ),
-            //       ],
-            //     ),
-            //     child: Row(
-            //       children: <Widget>[
-            //         Expanded(
-            //           child: TextButton(
-            //             style: TextButton.styleFrom(
-            //               backgroundColor: Colors.green,
-            //               shape: RoundedRectangleBorder(
-            //                 borderRadius: BorderRadius.circular(15),
-            //               ),
-            //             ),
-            //             onPressed: () {
-            //               getAirQualityIndex();
-            //             },
-            //             child: const Text(
-            //               'Predict',
-            //               style: TextStyle(
-            //                   color: Colors.white,
-            //                   fontSize: 25,
-            //                   fontWeight: FontWeight.bold),
-            //               textAlign: TextAlign.center,
-            //             ),
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            //icon if the temperature is too high
             Padding(
               padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
+                top: 5,
+                left: 10,
+                right: 10,
               ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(
+                      left: 10,
                     ),
-                    const SizedBox(width: 35),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 25, 0),
-                          child: Expanded(
-                              child: Text(
+                    child: Text(
+                      "Air Quality: ",
+                      style: TextStyle(
+                          fontSize: 30, fontFamily: 'Kanit Regular 400'),
+                    ),
+                  ),
+                  _airQualityData.tempValue == "33"
+                      ? Row(
+                        children: const [
+                          Icon(
+                              Icons.mood_bad,
+                              size: 50,
+                            ),
+                            Text(
+                              "Bad",
+                              style: TextStyle(
+                                  fontSize: 30, fontFamily: 'Kanit Medium 500'),
+                            ),
+                        ],
+                      )
+                      : 
+                        Row(
+                        children: const [
+                          Icon(
+                              Icons.tag_faces_sharp,
+                              size: 50,
+                            ),
+                            Text(
+                              "Good",
+                              style: TextStyle(
+                                  fontSize: 30, fontFamily: 'Kanit Medium 500'),
+                            ),
+                        ],
+                      )
+                ],
+              ),
+            ),
+
+            Padding(
+                padding: const EdgeInsets.only(
+                  top: 5,
+                  left: 10,
+                  right: 5,
+                  bottom: 10,
+                ),
+                child: DataTable(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 3,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black,
+                          offset: Offset.zero,
+                          blurRadius: 1,
+                          blurStyle: BlurStyle.outer,
+                        ),
+                      ],
+                    ),
+                    columns: const [
+                      DataColumn(
+                        label: Text(
+                          'Field',
+                          style: TextStyle(fontSize: 24),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Current Value',
+                          style: TextStyle(fontSize: 24),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                    rows: [
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
                             'Temperature',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
-                          )),
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 30, 0),
-                          child: _airQualityData.tempValue == "0"
+                        DataCell(
+                          _airQualityData.tempValue == "0"
                               ? const Text(
                                   'Loading...',
                                   style: TextStyle(
@@ -274,7 +305,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 )
                               : Text(
-                                  "${_airQualityData.tempValue}°C",
+                                  "${_airQualityData.tempValue} °C",
                                   style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 20,
@@ -283,62 +314,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 45),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 45, 0),
-                          child: Expanded(
-                              child: Text(
+                      ]),
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
                             'Humidity',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
-                          )),
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 30, 0),
-                          child: _airQualityData.humiValue == "0"
+                        DataCell(
+                          _airQualityData.tempValue == "0"
                               ? const Text(
                                   'Loading...',
                                   style: TextStyle(
@@ -349,7 +336,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 )
                               : Text(
-                                  "${_airQualityData.humiValue}%",
+                                  "${_airQualityData.humiValue} %",
                                   style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 20,
@@ -358,62 +345,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 30),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 30, 0),
-                          child: Expanded(
-                              child: Text(
-                            'CO2 Gas',
+                      ]),
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
+                            'CO2 Value',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
-                          )),
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 30, 0),
-                          child: _airQualityData.co2Value == "0"
+                        DataCell(
+                          _airQualityData.tempValue == "0"
                               ? const Text(
                                   'Loading...',
                                   style: TextStyle(
@@ -424,7 +367,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 )
                               : Text(
-                                  "${_airQualityData.co2Value}ppm",
+                                  "${_airQualityData.co2Value} ppm",
                                   style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 20,
@@ -433,62 +376,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 30),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 30, 0),
-                          child: Expanded(
-                              child: Text(
+                      ]),
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
                             'CO Value',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
-                          )),
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 30, 0),
-                          child: _airQualityData.coValue == "0"
+                        DataCell(
+                          _airQualityData.tempValue == "0"
                               ? const Text(
                                   'Loading...',
                                   style: TextStyle(
@@ -499,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 )
                               : Text(
-                                  "${_airQualityData.coValue}ppm",
+                                  "${_airQualityData.coValue} ppm",
                                   style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 20,
@@ -508,137 +407,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 15),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                          child: Expanded(
-                              child: Text(
-                            'PM 2.5',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
-                          )),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 25, 0),
-                          child: _airQualityData.pm25Value == "0"
-                              ? const Text(
-                                  'Loading...',
-                                  style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 20,
-                                      fontFamily: 'Arial',
-                                      fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.center,
-                                )
-                              : Text(
-                                  "${_airQualityData.pm25Value}ug/m3",
-                                  style: const TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 20,
-                                      fontFamily: 'Arial',
-                                      fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.center,
-                                ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-              ),
-              child: Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey[100],
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 4,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: <Widget>[
-                    const Expanded(
-                        child: Icon(
-                      Icons.sentiment_very_satisfied,
-                      color: Colors.black,
-                      size: 80,
-                    )),
-                    const VerticalDivider(
-                      color: Colors.black,
-                      thickness: 3,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 45),
-                    Column(
-                      children: [
-                        const SizedBox(height: 15),
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(0, 0, 45, 0),
-                          child: Expanded(
-                              child: Text(
+                      ]),
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
                             'UV Index',
                             style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: 'Arial',
-                                fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
-                          )),
+                          ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 10, 45, 0),
-                          child: _airQualityData.uvValue == "0"
+                        DataCell(
+                          _airQualityData.tempValue == "0"
                               ? const Text(
                                   'Loading...',
                                   style: TextStyle(
@@ -649,7 +429,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 )
                               : Text(
-                                  _airQualityData.uvValue,
+                                  "${_airQualityData.uvValue}",
                                   style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 20,
@@ -658,13 +438,92 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   textAlign: TextAlign.center,
                                 ),
                         ),
-                      ],
+                      ]),
+                      DataRow(cells: [
+                        const DataCell(
+                          Text(
+                            'PM 2.5',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        DataCell(
+                          _airQualityData.tempValue == "0"
+                              ? const Text(
+                                  'Loading...',
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 20,
+                                      fontFamily: 'Arial',
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                )
+                              : Text(
+                                  "${_airQualityData.pm25Value} µg/m3",
+                                  style: const TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 19,
+                                      fontFamily: 'Arial',
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                        ),
+                      ]),
+                    ])),
+
+            //button predict
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 10,
+                left: 100,
+                right: 100,
+              ),
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black,
+                      offset: Offset.zero,
+                      blurRadius: 1,
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        onPressed: () {
+                          // getAirQualityIndex();
+                        },
+                        child: const Text(
+                          'Predict',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 15),
           ],
         ),
       ),

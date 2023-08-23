@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:iu_air_quality/screen/home_screen.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
 
 void main() {
+  tzdata.initializeTimeZones();
   runApp(const MyApp());
 }
 

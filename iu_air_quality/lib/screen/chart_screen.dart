@@ -32,7 +32,7 @@ class _ChartScreenState extends State<ChartScreen> {
 
   Future<String> getStringData() async {
     var url =
-        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1";
+        "https://api.thingspeak.com/channels/2115707/feeds.json?results=1&timezone=Asia%2FBangkok";
     var response = await http.get(
       Uri.parse(url),
       headers: {"Accept": "application/json"},
