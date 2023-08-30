@@ -16,14 +16,16 @@
 
 .btn-chart {
   position: absolute;
-  right: 5%;
+  right: 0%;
   z-index: 1;
+  display: flex;
+  gap: 10px;
 }
 
 .btn-predict {
   color: #fff;
-  background-color: #56a95f;
-  border: 1px solid #56a95f;
+  background-color: #2b6130;
+  border: 1px solid #2b6130;
   border-radius: 5px;
   padding: 5px 10px;
   margin: 5px;
@@ -31,8 +33,8 @@
 
 .btn-predict-active {
   color: #fff;
-  background-color: #2b6130;
-  border: 1px solid #2b6130;
+  background-color: #56a95f;
+  border: 1px solid #56a95f;
   border-radius: 5px;
   padding: 5px 10px;
   margin: 5px;
@@ -44,8 +46,8 @@
 
 .btn-realtime {
   color: #fff;
-  background-color: #2b6130;
-  border: 1px solid #2b6130;
+  background-color: #56a95f;
+  border: 1px solid #56a95f;
   border-radius: 5px;
   padding: 5px 10px;
 }
@@ -56,8 +58,8 @@
 
 .btn-realtime-active {
   color: #fff;
-  background-color: #56a95f;
-  border: 1px solid #56a95f;
+  background-color: #2b6130;
+  border: 1px solid #2b6130;
   border-radius: 5px;
   padding: 5px 10px;
 }

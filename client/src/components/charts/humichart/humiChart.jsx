@@ -3,7 +3,16 @@ import "./humiChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { getDataOfHumiThingSpeak, predictHumi } from "../../../apis/callAPI";
+import {
+  getDataOfHumiThingSpeak,
+  predictHumiWithLR,
+  predictHumiWithGB,
+  predictHumiWithXGB,
+  predictHumiWithRF,
+  predictHumiWithKNN,
+} from "../../../apis/callAPI";
+import Dropdown from "react-dropdown";
+import "react-dropdown/style.css";
 
 const HumiChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
@@ -21,7 +30,7 @@ const HumiChart = () => {
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
 
-    //get the date of  the week
+    //get the date of the week
     let dayOfWeek = date.getDay();
     let dayOfWeekName = "";
     switch (dayOfWeek) {
@@ -52,6 +61,69 @@ const HumiChart = () => {
     if (month < 10) month = `0${month}`;
 
     return `${dayOfWeekName}, ${day}-${month}-${year}`;
+  };
+  const getAmPm = (hour) => {
+    return hour >= 12 ? "PM" : "AM";
+  };
+
+  const fetchData = async () => {
+    const formatInputStartDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2000:00:00`;
+    const formatInputEndDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2023:59:00`;
+
+    const result = await getDataOfHumiThingSpeak(
+      formatInputStartDate,
+      formatInputEndDate
+    );
+
+    return result;
+  };
+
+  const options = [
+    { value: "SVR", label: "SVR" },
+    { value: "SARIMA", label: "SARIMA" },
+    { value: "RF", label: "RF" },
+    { value: "GB", label: "GB" },
+    { value: "XGB", label: "XGB" },
+    { value: "LR", label: "LR" },
+    { value: "KNN", label: "KNN" },
+  ];
+
+  const selectOption = (option) => {
+    switch (option.value) {
+      case "SVR":
+        alert("SVR is not available now");
+        break;
+      case "SARIMA":
+        alert("SARIMA is not available now");
+        break;
+      case "RF":
+        predictRFFunction();
+        break;
+      case "GB":
+        predictGBFunction();
+        break;
+      case "XGB":
+        predictXGBFunction();
+        break;
+      case "LR":
+        predictLRFunction();
+        break;
+      case "KNN":
+        predictKNNFunction();
+        break;
+      default:
+        break;
+    }
   };
 
   const realChart = {
@@ -228,33 +300,45 @@ const HumiChart = () => {
     setCheckPredict(false);
   };
 
-  const predictFunction = async () => {
-    const formatUTCDateStart = `${currentDate.getUTCFullYear()}-${String(
-      currentDate.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-      2,
-      "0"
-    )}%2000:00:00`;
-    const formatUTCDateEnd = `${currentDate.getUTCFullYear()}-${String(
-      currentDate.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-      2,
-      "0"
-    )}%2023:59:00`;
-    const result = await getDataOfHumiThingSpeak(
-      formatUTCDateStart,
-      formatUTCDateEnd
-    );
-    const data = result.data.feeds.map((item) => parseFloat(item.field2));
+  const predictLRFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
 
-    const getAmPm = (hour) => {
-      return hour >= 12 ? "PM" : "AM";
-    };
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    const time = result.data.feeds.map((item) => {
-      const date = new Date(item.created_at);
+      const dataTemp = await predictHumiWithLR(time);
+      const resultPredict = dataTemp.data;
 
-      // Convert UTC time to Asia/Bangkok time zone
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
       const options = {
         timeZone: "Asia/Bangkok",
         hour: "2-digit",
@@ -263,76 +347,380 @@ const HumiChart = () => {
       };
 
       const formatter = new Intl.DateTimeFormat("en-US", options);
-      const bangkokTime = formatter.format(date);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
       const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
 
-      const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
-      const amPm = getAmPm(hour);
+      const adjustedHour = nextHour % 12 === 0 ? 12 : nextHour % 12;
+      const amPm = getAmPm(adjustedHour);
 
-      return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      formatTime.push(`${hour + 1}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
     });
+  };
 
-    //next hour based on time of last data point
-    const lastDataPointTime = new Date(
-      result.data.feeds[result.data.feeds.length - 1].created_at
-    );
+  const predictGBFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
 
-    const options = {
-      timeZone: "Asia/Bangkok",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    };
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    const formatter = new Intl.DateTimeFormat("en-US", options);
-    const bangkokTime = formatter.format(lastDataPointTime);
+      const dataTemp = await predictHumiWithGB(time);
+      const resultPredict = dataTemp.data;
 
-    const [hours, minutes] = bangkokTime.split(":").map(Number);
-    const nextHour = new Date(lastDataPointTime);
-    nextHour.setHours(hours + 1, minutes);
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
 
-    const nextHourBangkokTime = `${String(nextHour.getHours()).padStart(
-      2,
-      "0"
-    )}:${String(nextHour.getMinutes()).padStart(2, "0")}`;
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
 
-    time.push(nextHourBangkokTime);
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
 
-    const dataTemp = await predictHumi(data);
-    const resultPredict = dataTemp.data;
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
 
-    setCheckPredict(true);
-    setPredictData({
-      timeData: time,
-      seriesData: data.concat(resultPredict),
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+      
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictRFFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const dataTemp = await predictHumiWithRF(time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictXGBFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const dataTemp = await predictHumiWithXGB(time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictKNNFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const dataTemp = await predictHumiWithKNN(time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictTESTFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field2));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const objPredict = {
+        time: time,
+        data: data,
+      };
+
+      const dataTemp = await predictTempTest(objPredict.data, objPredict.time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const next_hour = parseInt(bangkokTime.split(":")[0], 10) + 1;
+
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
     });
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const formatUTCDateStart = `${currentDate.getUTCFullYear()}-${String(
-        currentDate.getUTCMonth() + 1
-      ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-        2,
-        "0"
-      )}%2000:00:00`;
-      const formatUTCDateEnd = `${currentDate.getUTCFullYear()}-${String(
-        currentDate.getUTCMonth() + 1
-      ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-        2,
-        "0"
-      )}%2023:59:00`;
-
-      const result = await getDataOfHumiThingSpeak(
-        formatUTCDateStart,
-        formatUTCDateEnd
-      );
-
+    fetchData().then((result) => {
       const data = result.data.feeds.map((item) => parseFloat(item.field2));
-
-      const getAmPm = (hour) => {
-        return hour >= 12 ? "PM" : "AM";
-      };
 
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
@@ -356,8 +744,7 @@ const HumiChart = () => {
       });
 
       setChartData({ seriesData: data, timeData: time });
-    };
-    fetchData();
+    });
     setInterval(fetchData, 5 * 60 * 1000);
   }, []);
 
@@ -368,7 +755,7 @@ const HumiChart = () => {
           <div className="btn-chart">
             <button
               className={
-                active === "realtime" ? "btn-realtime-active" : "btn-realtime"
+                active === "realtime" ? "btn-realtime" : "btn-realtime-active"
               }
               onClick={() => {
                 setActive("realtime");
@@ -377,16 +764,12 @@ const HumiChart = () => {
             >
               Real-time
             </button>
-            <button
-              className={
-                active === "predict" ? "btn-predict" : "btn-predict-active"
-              }
-              onClick={() => {
-                setActive("predict");
-                predictFunction();
-              }}
-            >
-              Predict
+            <button>
+              <Dropdown
+                options={options}
+                onChange={selectOption}
+                placeholder="Select algorithm"
+              />
             </button>
           </div>
           {checkPredict == false ? (

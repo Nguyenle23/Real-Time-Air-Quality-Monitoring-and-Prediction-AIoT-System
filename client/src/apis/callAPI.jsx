@@ -74,8 +74,36 @@ export const getDataOfHumiThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictHumi = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/humi", {
+export const predictHumiWithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/humi", {
+    dataHumi: data,
+  });
+  return response;
+};
+
+export const predictHumiWithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/humi", {
+    dataHumi: data,
+  });
+  return response;
+};
+
+export const predictHumiWithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/humi", {
+    dataHumi: data,
+  });
+  return response;
+};
+
+export const predictHumiWithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/humi", {
+    dataHumi: data,
+  });
+  return response;
+};
+
+export const predictHumiWithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/humi", {
     dataHumi: data,
   });
   return response;
@@ -89,8 +117,36 @@ export const getDataOfCO2ThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictCO2 = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/co2", {
+export const predictCO2WithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/co2", {
+    dataCO2: data,
+  });
+  return response;
+};
+
+export const predictCO2WithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/co2", {
+    dataCO2: data,
+  });
+  return response;
+};
+
+export const predictCO2WithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/co2", {
+    dataCO2: data,
+  });
+  return response;
+};
+
+export const predictCO2WithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/co2", {
+    dataCO2: data,
+  });
+  return response;
+};
+
+export const predictCO2WithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/co2", {
     dataCO2: data,
   });
   return response;
@@ -104,8 +160,36 @@ export const getDataOfCOThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictCO = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/co", {
+export const predictCOWithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/co", {
+    dataCO: data,
+  });
+  return response;
+};
+
+export const predictCOWithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/co", {
+    dataCO: data,
+  });
+  return response;
+};
+
+export const predictCOWithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/co", {
+    dataCO: data,
+  });
+  return response;
+};
+
+export const predictCOWithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/co", {
+    dataCO: data,
+  });
+  return response;
+};
+
+export const predictCOWithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/co", {
     dataCO: data,
   });
   return response;
@@ -119,8 +203,36 @@ export const getDataOfUVThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictUV = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/uv", {
+export const predictUVWithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/uv", {
+    dataUV: data,
+  });
+  return response;
+};
+
+export const predictUVWithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/uv", {
+    dataUV: data,
+  });
+  return response;
+};
+
+export const predictUVWithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/uv", {
+    dataUV: data,
+  });
+  return response;
+};
+
+export const predictUVWithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/uv", {
+    dataUV: data,
+  });
+  return response;
+};
+
+export const predictUVWithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/uv", {
     dataUV: data,
   });
   return response;
@@ -134,10 +246,37 @@ export const getDataOfPM25ThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictPM25 = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/pm25", {
+export const predictPM25WithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
+export const predictPM25WithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/pm25", {
+    dataPM25: data,
+  });
+  return response;
+};
+
+export const predictPM25WithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/pm25", {
+    dataPM25: data,
+  });
+  return response;
+};
+
+export const predictPM25WithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/pm25", {
+    dataPM25: data,
+  });
+  return response;
+};
+
+export const predictPM25WithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/pm25", {
+    dataPM25: data,
+  });
+  return response;
+};

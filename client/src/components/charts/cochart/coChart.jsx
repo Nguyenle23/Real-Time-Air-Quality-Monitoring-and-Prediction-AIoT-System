@@ -3,11 +3,16 @@ import "./coChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { getDataOfCOThingSpeak, predictCO } from "../../../apis/callAPI";
-
-import * as tf from "@tensorflow/tfjs";
-import { loadGraphModel } from "@tensorflow/tfjs-converter";
-// import ModelTest  from "../../../../public/model.json";
+import {
+  getDataOfCOThingSpeak,
+  predictCOWithLR,
+  predictCOWithGB,
+  predictCOWithXGB,
+  predictCOWithRF,
+  predictCOWithKNN,
+} from "../../../apis/callAPI";
+import Dropdown from "react-dropdown";
+import "react-dropdown/style.css";
 
 const COChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
@@ -17,7 +22,7 @@ const COChart = () => {
   });
   const [checkPredict, setCheckPredict] = useState(false);
 
-  const [active, setActive] = useState('realtime');
+  const [active, setActive] = useState("realtime");
 
   const currentDate = new Date();
   const formatDate = (date) => {
@@ -25,7 +30,7 @@ const COChart = () => {
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
 
-    //get the date of  the week
+    //get the date of the week
     let dayOfWeek = date.getDay();
     let dayOfWeekName = "";
     switch (dayOfWeek) {
@@ -57,13 +62,76 @@ const COChart = () => {
 
     return `${dayOfWeekName}, ${day}-${month}-${year}`;
   };
+  const getAmPm = (hour) => {
+    return hour >= 12 ? "PM" : "AM";
+  };
+
+  const fetchData = async () => {
+    const formatInputStartDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2000:00:00`;
+    const formatInputEndDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2023:59:00`;
+
+    const result = await getDataOfCOThingSpeak(
+      formatInputStartDate,
+      formatInputEndDate
+    );
+
+    return result;
+  };
+
+  const options = [
+    { value: "SVR", label: "SVR" },
+    { value: "SARIMA", label: "SARIMA" },
+    { value: "RF", label: "RF" },
+    { value: "GB", label: "GB" },
+    { value: "XGB", label: "XGB" },
+    { value: "LR", label: "LR" },
+    { value: "KNN", label: "KNN" },
+  ];
+
+  const selectOption = (option) => {
+    switch (option.value) {
+      case "SVR":
+        alert("SVR is not available now");
+        break;
+      case "SARIMA":
+        alert("SARIMA is not available now");
+        break;
+      case "RF":
+        predictRFFunction();
+        break;
+      case "GB":
+        predictGBFunction();
+        break;
+      case "XGB":
+        predictXGBFunction();
+        break;
+      case "LR":
+        predictLRFunction();
+        break;
+      case "KNN":
+        predictKNNFunction();
+        break;
+      default:
+        break;
+    }
+  };
 
   const realChart = {
     accessibility: {
       enabled: false,
     },
     title: {
-      text: `Real-time data of CO values on ${formatDate(currentDate)}`,
+      text: `Real-time data of CO value on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -99,7 +167,7 @@ const COChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO Values (ppm)",
+        text: "CO (ppm)",
       },
     },
     responsive: {
@@ -154,7 +222,7 @@ const COChart = () => {
       enabled: false,
     },
     title: {
-      text: `Predicted data of CO Values for next hour on ${formatDate(
+      text: `Predicted data of CO value for next hour on ${formatDate(
         currentDate
       )}`,
     },
@@ -191,7 +259,7 @@ const COChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO Values (ppm)",
+        text: "CO (ppm)",
       },
     },
     responsive: {
@@ -232,33 +300,45 @@ const COChart = () => {
     setCheckPredict(false);
   };
 
-  const predictFunction = async () => {
-    const formatUTCDateStart = `${currentDate.getUTCFullYear()}-${String(
-      currentDate.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-      2,
-      "0"
-    )}%2000:00:00`;
-    const formatUTCDateEnd = `${currentDate.getUTCFullYear()}-${String(
-      currentDate.getUTCMonth() + 1
-    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-      2,
-      "0"
-    )}%2023:59:00`;
-    const result = await getDataOfCOThingSpeak(
-      formatUTCDateStart,
-      formatUTCDateEnd
-    );
-    const data = result.data.feeds.map((item) => parseFloat(item.field4));
+  const predictLRFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
-    const getAmPm = (hour) => {
-      return hour >= 12 ? "PM" : "AM";
-    };
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    const time = result.data.feeds.map((item) => {
-      const date = new Date(item.created_at);
+      const dataTemp = await predictCOWithLR(time);
+      const resultPredict = dataTemp.data;
 
-      // Convert UTC time to Asia/Bangkok time zone
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
       const options = {
         timeZone: "Asia/Bangkok",
         hour: "2-digit",
@@ -267,160 +347,380 @@ const COChart = () => {
       };
 
       const formatter = new Intl.DateTimeFormat("en-US", options);
-      const bangkokTime = formatter.format(date);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
       const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
 
-      const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
-      const amPm = getAmPm(hour);
+      const adjustedHour = nextHour % 12 === 0 ? 12 : nextHour % 12;
+      const amPm = getAmPm(adjustedHour);
 
-      return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      formatTime.push(`${hour + 1}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
     });
+  };
 
-    //next hour based on time of last data point
-    const lastDataPointTime = new Date(
-      result.data.feeds[result.data.feeds.length - 1].created_at
-    );
+  const predictGBFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
-    const options = {
-      timeZone: "Asia/Bangkok",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    };
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    const formatter = new Intl.DateTimeFormat("en-US", options);
-    const bangkokTime = formatter.format(lastDataPointTime);
+      const dataTemp = await predictCOWithGB(time);
+      const resultPredict = dataTemp.data;
 
-    const [hours, minutes] = bangkokTime.split(":").map(Number);
-    const nextHour = new Date(lastDataPointTime);
-    nextHour.setHours(hours + 1, minutes);
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
 
-    const nextHourBangkokTime = `${String(nextHour.getHours()).padStart(
-      2,
-      "0"
-    )}:${String(nextHour.getMinutes()).padStart(2, "0")}`;
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
 
-    time.push(nextHourBangkokTime);
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
 
-    const dataTemp = await predictCO(data);
-    const resultPredict = dataTemp.data;
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
 
-    setCheckPredict(true);
-    setPredictData({
-      timeData: time,
-      seriesData: data.concat(resultPredict),
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
     });
+  };
 
-    // const originalArray = [
-    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
-    // ];
+  const predictRFFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
-    // const modelLSTM = await tf.loadGraphModel("src/model.json");
-    // console.log(modelLSTM);
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    // const windowSize = 12;
-    // const numWindows = originalArray.length - windowSize + 1;
+      const dataTemp = await predictCOWithRF(time);
+      const resultPredict = dataTemp.data;
 
-    // const dataBatches = [];
-    // for (let i = 0; i < numWindows; i++) {
-    //   const batch = originalArray.slice(i, i + windowSize);
-    //   dataBatches.push(batch);
-    // }
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
 
-    // console.log(dataBatches.length, dataBatches[0].length);
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
 
-    // // Convert to TensorFlow.js tensor
-    // const tensorDataBatches = dataBatches.map((batch) =>
-    //   tf.tensor2d(batch, [1, windowSize])
-    // );
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
 
-    // console.log(tensorDataBatches.length, tensorDataBatches[0].shape);
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
 
-    // // Reshape tensors to [1, 12, 1]
-    // const reshapedTensors = tensorDataBatches.map((tensor) =>
-    //   tensor.reshape([1, windowSize, 1])
-    // );
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
 
-    // console.log(reshapedTensors.length, reshapedTensors[0].shape);
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
 
-    // // Predict.executeAsync
-    // const predictions = modelLSTM.executeAsync(reshapedTensors);
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
 
-    /////--------------------------------------nay model web
-    // const originalArray = [
-    //   34.6, 35.3, 35.3, 34.6, 35.9, 34.6, 35.3, 36.4, 37, 35.9, 36.4, 37.5,
-    // ];
-    // console.log(originalArray.length);
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
 
-    // const windowSize = 12;
-    // const numWindows = originalArray.length - windowSize + 1;
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
 
-    // const dataBatches = [];
-    // for (let i = 0; i < numWindows; i++) {
-    //   const batch = originalArray.slice(i, i + windowSize);
-    //   dataBatches.push(batch);
-    // }
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
 
-    // console.log(dataBatches.length, dataBatches[0].length);
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
 
-    // // Convert to TensorFlow.js tensor
-    // const tensorDataBatches = dataBatches.map((batch) =>
-    //   tf.tensor2d(batch, [windowSize, 1])
-    // );
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
 
-    // const model1 = tf.sequential();
-    // model1.add(tf.layers.lstm({ units: 8, inputShape: [windowSize, 1] }));
-    // model1.add(tf.layers.dense({ units: 1 }));
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
 
-    // tensorDataBatches.forEach((tensorBatch) => {
-    //   const input = tensorBatch.reshape([1, windowSize, 1]);
-    //   const output = model1.predict(input);
-    //   input.print();
-    //   output.print();
-    //   //inverse transform to get the original data
-    //   const originalData = output.mul(0.1).add(34.6);
-    //   originalData.print();
-    // });
+  const predictXGBFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
 
-    // // const predictions = model.predict(inputTensor).dataSync();
-    // // console.log(predictions);
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
 
-    // // const predict = model.predict(tf.tensor2d([reshapedData])).dataSync();
+      const dataTemp = await predictCOWithXGB(time);
+      const resultPredict = dataTemp.data;
 
-    // const predictData = {
-    //   timeData: time,
-    //   // seriesData: data.concat(predictions[0]),
-    // };
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
 
-    // setPredictData(predictData);
-    // setCheckPredict(true);
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictKNNFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const dataTemp = await predictCOWithKNN(time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
+  };
+
+  const predictTESTFunction = async () => {
+    fetchData().then(async (result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field4));
+
+      const time = [
+        ...result.data.feeds.map((item) => {
+          return item.created_at;
+        }),
+      ];
+
+      const objPredict = {
+        time: time,
+        data: data,
+      };
+
+      const dataTemp = await predictTempTest(objPredict.data, objPredict.time);
+      const resultPredict = dataTemp.data;
+
+      const formatTime = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      //next hour based on time of last data point
+      const lastDataPointTime = new Date(
+        result.data.feeds[result.data.feeds.length - 1].created_at
+      );
+
+      const options = {
+        timeZone: "Asia/Bangkok",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+
+      const formatter = new Intl.DateTimeFormat("en-US", options);
+      const bangkokTime = formatter.format(lastDataPointTime);
+
+      const hour = parseInt(bangkokTime.split(":")[0], 10);
+      const next_hour = parseInt(bangkokTime.split(":")[0], 10) + 1;
+
+      const nextHour = new Date(lastDataPointTime);
+      nextHour.setHours(hour + 1);
+
+      // Convert to 12-hour format with AM/PM notation
+      let adjustedHour = nextHour.getHours() % 12;
+      adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
+
+      const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
+
+      formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
+
+      setCheckPredict(true);
+      setPredictData({
+        timeData: formatTime,
+        seriesData: data.concat(resultPredict),
+      });
+    });
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const formatUTCDateStart = `${currentDate.getUTCFullYear()}-${String(
-        currentDate.getUTCMonth() + 1
-      ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-        2,
-        "0"
-      )}%2000:00:00`;
-      const formatUTCDateEnd = `${currentDate.getUTCFullYear()}-${String(
-        currentDate.getUTCMonth() + 1
-      ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
-        2,
-        "0"
-      )}%2023:59:00`;
-
-      const result = await getDataOfCOThingSpeak(
-        formatUTCDateStart,
-        formatUTCDateEnd
-      );
-
+    fetchData().then((result) => {
       const data = result.data.feeds.map((item) => parseFloat(item.field4));
-
-      const getAmPm = (hour) => {
-        return hour >= 12 ? "PM" : "AM";
-      };
 
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
@@ -444,28 +744,7 @@ const COChart = () => {
       });
 
       setChartData({ seriesData: data, timeData: time });
-      // const fields = _.pickBy(result.data.channel, (value, key) =>
-      //   key.includes("field")
-      // );
-
-      // const newData = { seriesData: [], timeData: [] };
-
-      // _.forOwn(fields, (name, key) => {
-      //   newData.seriesData.push({
-      //     name,
-      //     data: result.data.feeds.map((item) => parseFloat(item[key])),
-      //   });
-      // });
-
-      // result.data.feeds.map((item) => {
-      //   const dateObject = new Date(item.created_at);
-      //   const hour = String(dateObject.getUTCHours()).padStart(2, "0");
-      //   const minute = String(dateObject.getUTCMinutes()).padStart(2, "0");
-      //   const formattedTime = `${hour}:${minute}`;
-      //   newData.timeData.push(formattedTime);
-      // });
-    };
-    fetchData();
+    });
     setInterval(fetchData, 5 * 60 * 1000);
   }, []);
 
@@ -475,22 +754,22 @@ const COChart = () => {
         <div className="btn-line-chart">
           <div className="btn-chart">
             <button
-              className={active === 'realtime' ? 'btn-realtime-active' : 'btn-realtime'}
+              className={
+                active === "realtime" ? "btn-realtime" : "btn-realtime-active"
+              }
               onClick={() => {
-                setActive('realtime');
+                setActive("realtime");
                 realtimeFunction();
               }}
             >
               Real-time
             </button>
-            <button
-              className={active === 'predict' ? 'btn-predict' : 'btn-predict-active'}
-              onClick={() => {
-                setActive('predict');
-                predictFunction();
-              }}
-            >
-              Predict
+            <button>
+              <Dropdown
+                options={options}
+                onChange={selectOption}
+                placeholder="Select algorithm"
+              />
             </button>
           </div>
           {checkPredict == false ? (

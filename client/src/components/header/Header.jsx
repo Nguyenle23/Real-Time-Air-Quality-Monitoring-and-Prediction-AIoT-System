@@ -81,8 +81,6 @@ const Header = () => {
   }, []);
 
   const formatStringtoTime = (str) => {
-
-    console.log(str)
     // var date = new Date(str);
     // var hour = date.getUTCHours();
     // var minute = date.getUTCMinutes();
@@ -112,7 +110,7 @@ const Header = () => {
     const amPm = hour >= 12 ? "PM" : "AM";
     const adjustedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
   
-    return `${adjustedHour}:${bangkokTime.slice(3)}:${amPm}`;
+    return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
   };
 
   return (
