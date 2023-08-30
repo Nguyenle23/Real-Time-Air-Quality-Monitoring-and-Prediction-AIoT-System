@@ -16,9 +16,52 @@ export const getDataOfTempThingSpeak = async (start, end) => {
   return response;
 };
 
-export const predictTemp = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/temp", {
+export const getDataOfTempThuDuc = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2239030/fields/1.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
+  );
+  return response;
+};
+
+export const predictTempWithLR = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lr/temp", {
     dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempWithGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/gb/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempWithXGB = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/xgb/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempWithRF = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/rf/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempWithKNN = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/knn/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempTest = async (data, time) => {
+  const response = await axios.post("http://localhost:5000/predict/test/temp", {
+    dataTemp: data,
+    timeTemp: time,
   });
   return response;
 };
