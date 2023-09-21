@@ -166,6 +166,63 @@ class PredictController:
         print(f"File not found: {model_path}")
     return jsonify(prediction[0].tolist())
   
+  def predictTestTemp():
+    if request.method == 'POST':
+      data = request.json
+      tempData = data['dataTemp']
+      tempTime = data['timeTemp']
+      print(tempData)
+      print(tempTime)
+
+      arrayData = np.array(tempData)
+      arrayTime = np.array(tempTime)
+      datetimeTemp = pd.to_datetime(arrayTime)
+
+      dataset = pd.DataFrame({'temp': arrayData, 'time': datetimeTemp})
+
+      dataset['temp_target'] = arrayData
+      dataset.reset_index(inplace=True)
+
+      X_temp = (dataset['time'] - dataset['time'].min()).dt.total_seconds().values.reshape(-1, 1)
+      y_temp = dataset['temp_target']
+      print(X_temp)
+      print(y_temp)
+
+      p_gb = {'n_estimators': 500, 'max_depth': 10, 'min_samples_split': 2,'learning_rate': 0.09, 'loss': 'squared_error', 'random_state': RANDOM_SEED}
+      test_model = GradientBoostingRegressor(**p_gb)
+
+      # p_xgb = {'n_estimators': 700, 'max_depth': 12, 'learning_rate': 0.05, 'random_state': 12}
+      # test_model = XGBRegressor(**p_xgb)
+
+      # p_rf = {'bootstrap': False,
+      # 'max_depth': 110,
+      # 'max_features': 'sqrt',
+      # 'min_samples_leaf': 2,
+      # 'min_samples_split': 2,
+      # 'n_estimators': 600,
+      # 'random_state': RANDOM_SEED}
+
+      # test_model = RandomForestRegressor(**p_rf)
+
+      test_model.fit(X_temp, y_temp)
+
+      #format 
+      input_datetime_str = str(datetimeTemp.min())
+
+      # Parse the input datetime string
+      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+
+      # Format the datetime as desired
+      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+      old_date = pd.to_datetime(formatted_datetime)
+
+      current_date = pd.Timestamp.now()
+      time_differences = (current_date - old_date).total_seconds()
+
+      prediction = test_model.predict([[time_differences]])
+      print(prediction)
+    return jsonify(prediction[0].tolist())
+  
   #----------------------predict humidity----------------------
   def predictLRHumi():
     if request.method == 'POST':

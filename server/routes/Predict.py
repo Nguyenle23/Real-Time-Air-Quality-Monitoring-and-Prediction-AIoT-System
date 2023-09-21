@@ -9,6 +9,7 @@ Predict.route('/gb/temp', methods = ['POST'])(PredictController.predictGBTemp)
 Predict.route('/xgb/temp', methods = ['POST'])(PredictController.predictXGBTemp)
 Predict.route('/rf/temp', methods = ['POST'])(PredictController.predictRFTemp)
 Predict.route('/knn/temp', methods = ['POST'])(PredictController.predictKNNTemp)
+Predict.route('/test/temp', methods = ['POST'])(PredictController.predictTestTemp)
 
 Predict.route('/lr/humi', methods = ['POST'])(PredictController.predictLRHumi)
 Predict.route('/gb/humi', methods = ['POST'])(PredictController.predictGBHumi)
