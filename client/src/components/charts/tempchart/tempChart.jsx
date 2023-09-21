@@ -18,6 +18,11 @@ import "react-dropdown/style.css";
 
 const TempChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
+  const [chartDataThuDuc, setChartDataThuDuc] = useState({
+    seriesData: [],
+    timeData: [],
+  });
+
   const [predictData, setPredictData] = useState({
     seriesData: [],
     timeData: [],
@@ -88,31 +93,28 @@ const TempChart = () => {
     );
 
     return result;
+  };
 
-    const data = result.data.feeds.map((item) => parseFloat(item.field1));
+  const fetchDataThuDuc = async () => {
+    const formatInputStartDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2000:00:00`;
+    const formatInputEndDate = `${currentDate.getUTCFullYear()}-${String(
+      currentDate.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(currentDate.getUTCDate()).padStart(
+      2,
+      "0"
+    )}%2023:59:00`;
 
-    const time = result.data.feeds.map((item) => {
-      const date = new Date(item.created_at);
+    const result = await getDataOfTempThuDuc(
+      formatInputStartDate,
+      formatInputEndDate
+    );
 
-      // Convert UTC time to Asia/Bangkok time zone
-      const options = {
-        timeZone: "Asia/Bangkok",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      };
-
-      const formatter = new Intl.DateTimeFormat("en-US", options);
-      const bangkokTime = formatter.format(date);
-      const hour = parseInt(bangkokTime.split(":")[0], 10);
-
-      const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
-      const amPm = getAmPm(hour);
-
-      return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
-    });
-
-    return { seriesData: data, timeData: time };
+    return result;
   };
 
   const options = [
@@ -244,6 +246,11 @@ const TempChart = () => {
         type: "line",
         name: "Ho Chi Minh City",
         data: chartData.seriesData,
+      },
+      {
+        type: "line",
+        name: "Thu Duc City",
+        data: chartDataThuDuc.seriesData,
       },
     ],
   };
@@ -449,7 +456,7 @@ const TempChart = () => {
       const hour = parseInt(bangkokTime.split(":")[0], 10);
       const nextHour = new Date(lastDataPointTime);
       nextHour.setHours(hour + 1);
-      
+
       // Convert to 12-hour format with AM/PM notation
       let adjustedHour = nextHour.getHours() % 12;
       adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
@@ -775,6 +782,32 @@ const TempChart = () => {
       });
 
       setChartData({ seriesData: data, timeData: time });
+    });
+    fetchDataThuDuc().then((result) => {
+      const data = result.data.feeds.map((item) => parseFloat(item.field1));
+
+      const time = result.data.feeds.map((item) => {
+        const date = new Date(item.created_at);
+
+        // Convert UTC time to Asia/Bangkok time zone
+        const options = {
+          timeZone: "Asia/Bangkok",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        };
+
+        const formatter = new Intl.DateTimeFormat("en-US", options);
+        const bangkokTime = formatter.format(date);
+        const hour = parseInt(bangkokTime.split(":")[0], 10);
+
+        const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
+        const amPm = getAmPm(hour);
+
+        return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
+      });
+
+      setChartDataThuDuc({ seriesData: data, timeData: time });
     });
     setInterval(fetchData, 5 * 60 * 1000);
   }, []);
