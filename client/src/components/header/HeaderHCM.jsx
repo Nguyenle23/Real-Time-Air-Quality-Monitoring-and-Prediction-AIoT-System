@@ -6,13 +6,13 @@ import coIcon from "../../assets/co-icon.png";
 import dustIcon from "../../assets/dust-icon.png";
 import uvIcon from "../../assets/uv-icon.png";
 import locationMark from "../../assets/location.png";
-import { getNewestDataThingSpeak } from "../../apis/callAPI";
+import { getNewestDataHCM, getNewestDataThuDuc } from "../../apis/callAPI";
 
-import "./Header.css";
+import "./HeaderHCM.css";
 
-const Header = () => {
-  const [thingspeak, setThingspeak] = useState([]);
-  const [time, setTime] = useState("");
+const HeaderHCM = () => {
+  const [dataHCM, setDataHCM] = useState([]);
+  const [timeHCM, setTimeHCM] = useState("");
   const keyData = [
     {
       index: "1",
@@ -72,10 +72,10 @@ const Header = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const data = await getNewestDataThingSpeak();
+      const data = await getNewestDataHCM();
       var getFeeds = data.feeds;
-      setThingspeak(getFeeds);
-      setTime(getFeeds[0].created_at);
+      setDataHCM(getFeeds);
+      setTimeHCM(getFeeds[0].created_at);
     };
     getData();
   }, []);
@@ -118,7 +118,7 @@ const Header = () => {
       <div className="location">
         <img className="location-icon" src={locationMark} alt="icon" />
         <h3 className="location-text">
-          {time ? formatStringtoTime(time) + " | " : " Loading ...| "}
+          {timeHCM ? formatStringtoTime(timeHCM) + " | " : " Loading ...| "}
           Phu Nhuan District, Ho Chi Minh City
         </h3>
       </div>
@@ -131,8 +131,8 @@ const Header = () => {
                 <h4 className="list-item-title">{data.title}</h4>
                 <span className="list-item-number">
                   <span>
-                    {thingspeak[0]
-                      ? Math.round(thingspeak[0][data.field] * 1000) / 1000
+                    {dataHCM[0]
+                      ? Math.round(dataHCM[0][data.field] * 1000) / 1000
                       : "Loading..."}
                   </span>
                   <span className="list-item-level">{data.level}</span>
@@ -146,4 +146,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default HeaderHCM;

@@ -16,14 +16,32 @@ body {
     rgba(43, 97, 48, 1) 20%,
     rgba(63, 133, 70, 1) 44%,
     rgba(83, 168, 91, 1) 65%,
-    rgba(255, 255, 255, 1) 85%
+    rgba(255, 255, 255, 1) 95%
   );
   background-repeat: no-repeat;
   font-family: "Montserrat", sans-serif;
   font-size: 1.6rem;
 
   /* disable overflow */
-  overflow: hidden;
+  /* overflow: hidden; */
+}
+
+.container {
+  margin: auto;
+  width: 90%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 60vh;
+  flex: 1;
+}
+
+.container-map-chart {
+  margin: auto;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 60vh;
+  flex: 1;
 }
 
 /* width */
@@ -47,13 +65,4 @@ body {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #535353;
-}
-
-.container {
-  margin: auto;
-  width: 90%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  height: 60vh;
-  flex: 1;
 }

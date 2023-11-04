@@ -23,6 +23,7 @@ const TempChart = () => {
     timeData: [],
   });
 
+  console.log(chartDataThuDuc)
   const [predictData, setPredictData] = useState({
     seriesData: [],
     timeData: [],
