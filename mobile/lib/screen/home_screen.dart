@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // ),
             Center(
               child: Text(
-                'Air Quality Monitoring App',
+                'Air Quality Monitoring',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 25,

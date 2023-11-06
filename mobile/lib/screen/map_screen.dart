@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:http/http.dart' as http;
+import 'package:graphic/graphic.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -17,11 +20,18 @@ class _MapScreenState extends State<MapScreen> {
   bool _isSearchActive = false;
   final _mapController = MapController();
   List _markers = [];
-  Map<String, dynamic> newestData = {};
+  Map<String, dynamic> newestDataHCM = {};
+  Map<String, dynamic> newestDataThuDuc = {};
   var dataChannels = [];
   var dataFeeds = [];
-  double latThingspeak = 0.0;
-  double lngThingspeak = 0.0;
+  double latHCM = 0.0;
+  double longHCM = 0.0;
+  double latThuDuc = 0.0;
+  double longThuDuc = 0.0;
+  String dayHCM = '';
+  String dayTD = '';
+  String timeHCM = '';
+  String timeTD = '';
   bool isLoading = true;
 
   void toggleSearch() {
@@ -34,28 +44,90 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   // get data from thingspeak
-  Future<String> getThingspeakData() async {
+  Future<String> getDataHCM() async {
     var url =
         "https://api.thingspeak.com/channels/2115707/feeds.json?results=1";
     var response = await http.get(
       Uri.parse(url),
       headers: {"Accept": "application/json"},
     );
-    // print(response.body.runtimeType);
+    return response.body;
+  }
+
+  Future<String> getDataThuDuc() async {
+    var url =
+        "https://api.thingspeak.com/channels/2239030/feeds.json?results=1";
+    var response = await http.get(
+      Uri.parse(url),
+      headers: {"Accept": "application/json"},
+    );
     return response.body;
   }
 
   getData() async {
-    var data = await getThingspeakData();
-    var jsonData = json.decode(data);
-    var getChannel = jsonData['channel'];
-    print(getChannel);
-    newestData = jsonData['feeds'][0];
-    print(newestData);
+    var dataHCM = await getDataHCM();
+    var jsonDataHCM = json.decode(dataHCM);
+    var getChannelHCM = jsonDataHCM['channel'];
+    newestDataHCM = jsonDataHCM['feeds'][0];
+
+    // double tempValue = double.parse(getFeed[0]['field1']);
+    // double humiValue = double.parse(getFeed[0]['field2']);
+    // double co2Value = double.parse(getFeed[0]['field3']);
+    // double coValue = double.parse(getFeed[0]['field4']);
+    // double pm25Value = double.parse(getFeed[0]['field5']);
+    // double uvValue = double.parse(getFeed[0]['field6']);
+
+    // String formattedTemp = tempValue.toStringAsFixed(1);
+    // String formattedHumi = humiValue.toStringAsFixed(1);
+    // String formattedCO2 = co2Value.toStringAsFixed(4);
+    // String formattedCO = coValue.toStringAsFixed(4);
+    // String formattedPM25 = pm25Value.toStringAsFixed(4);
+    // String formattedUV = uvValue.toStringAsFixed(4);
+
+    //formate date
+    String dateTimeHCM = getChannelHCM['created_at'];
+    DateTime dateTime =
+        DateTime.parse(dateTimeHCM).toLocal();
+    String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
+    tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
+    tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
+    String dayOfWeek =
+        DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
+    String day =
+        DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
+    String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
+
+    var dataThuDuc = await getDataThuDuc();
+    var jsonDataThuDuc = json.decode(dataThuDuc);
+    var getChannelThuDuc = jsonDataThuDuc['channel'];
+    newestDataThuDuc = jsonDataThuDuc['feeds'][0];
+
+    //formate date
+    String dateTimeThuDuc = getChannelThuDuc['created_at'];
+    DateTime dateTimeTD =
+        DateTime.parse(dateTimeThuDuc).toLocal(); 
+    String collectedDateTD =
+        DateFormat('HH:mm:ss').format(dateTimeTD).toString();
+    tz.Location asiaBangkokTD = tz.getLocation('Asia/Bangkok');
+    tz.TZDateTime asiaBangkokTimeTD =
+        tz.TZDateTime.from(dateTimeTD, asiaBangkokTD);
+    String dayOfWeekTD =
+        DateFormat('EEEE', 'en_US').format(asiaBangkokTimeTD).toString();
+    String dayTD =
+        DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTimeTD).toString();
+    String amPmTD =
+        DateFormat('a', 'en_US').format(asiaBangkokTimeTD).toString();
 
     setState(() {
-      latThingspeak = double.parse(getChannel['latitude']);
-      lngThingspeak = double.parse(getChannel['longitude']);
+      latHCM = double.parse(getChannelHCM['latitude']);
+      longHCM = double.parse(getChannelHCM['longitude']);
+      dayHCM = "$dayOfWeek || $day ";
+      timeHCM = "$collectedDate $amPm";
+
+      latThuDuc = double.parse(getChannelThuDuc['latitude']);
+      longThuDuc = double.parse(getChannelThuDuc['longitude']);
+      dayTD = "$dayOfWeekTD || $dayTD ";
+      timeTD = "$collectedDateTD $amPmTD";
       isLoading = false;
     });
   }
@@ -64,6 +136,198 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     getData();
+  }
+
+  void showStation1BottomSheet(BuildContext context) {
+    showBottomSheet(
+      context: context,
+      builder: (context) => Card(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: const [
+                          Text(
+                            'Station: 1',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Ho Chi Minh City',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Divider(
+                          thickness: 2,
+                          color: Color.fromARGB(255, 15, 71, 7),
+                        ),
+                      ),
+                      Text(
+                        'Time: $timeHCM',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Date: $dayHCM',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Divider(
+                          thickness: 2,
+                          color: Color.fromARGB(255, 15, 71, 7),
+                        ),
+                      ),
+                      Text(
+                        'Temperature: ${newestDataHCM['field1']} °C',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Humidity: ${newestDataHCM['field2']} %',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'CO2: ${newestDataHCM['field3']} ppm',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'CO: ${newestDataHCM['field4']} ppm',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'PM2.5: ${newestDataHCM['field5']} µg/m3',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'UV Index: ${newestDataHCM['field6']} mW/cm2',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Dewpoint: ${newestDataHCM['field7']} °C',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.clear),
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+
+  void showStation2BottomSheet(BuildContext context) {
+    showBottomSheet(
+      context: context,
+      builder: (context) => Card(
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: const [
+                          Text(
+                            'Station: 2',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Thu Duc City',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Divider(
+                          thickness: 2,
+                          color: Color.fromARGB(255, 15, 71, 7),
+                        ),
+                      ),
+                      Text(
+                        'Time: $timeTD',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Date: $dayTD',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 50.0),
+                        child: Divider(
+                          thickness: 2,
+                          color: Color.fromARGB(255, 15, 71, 7),
+                        ),
+                      ),
+                      Text(
+                        'Temperature: ${newestDataThuDuc['field1']} °C',  
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Humidity: ${newestDataThuDuc['field2']} %',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'CO2: ${newestDataThuDuc['field3']} ppm',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'CO: ${newestDataThuDuc['field4']} ppm',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'PM2.5: ${newestDataThuDuc['field5']} µg/m3',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'UV Index: ${newestDataThuDuc['field6']} mW/cm2',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Dewpoint: ${newestDataThuDuc['field7']} °C',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Icon(Icons.clear),
+                ),
+              ],
+            ),
+          )),
+    );
   }
 
   @override
@@ -87,7 +351,7 @@ class _MapScreenState extends State<MapScreen> {
           directionArrowMarker: const MarkerIcon(
             icon: Icon(
               Icons.location_on,
-              color: Color.fromRGBO(100, 221, 23, 1),
+              color: Color.fromRGBO(23, 43, 221, 1),
               size: 120,
             ),
           ),
@@ -116,10 +380,23 @@ class _MapScreenState extends State<MapScreen> {
               await _mapController.currentLocation();
 
               // add marker
-              GeoPoint position =
-                  GeoPoint(latitude: latThingspeak, longitude: lngThingspeak);
+              GeoPoint station1Position =
+                  GeoPoint(latitude: latHCM, longitude: longHCM);
               _mapController.addMarker(
-                position,
+                station1Position,
+                markerIcon: const MarkerIcon(
+                  icon: Icon(
+                    Icons.cloud_circle_rounded,
+                    color: Colors.green,
+                    size: 140,
+                  ),
+                ),
+              );
+
+              GeoPoint station2Position =
+                  GeoPoint(latitude: latThuDuc, longitude: longThuDuc);
+              _mapController.addMarker(
+                station2Position,
                 markerIcon: const MarkerIcon(
                   icon: Icon(
                     Icons.cloud_circle_rounded,
@@ -132,105 +409,14 @@ class _MapScreenState extends State<MapScreen> {
           }
         },
         onGeoPointClicked: (geoPoint) {
-          showBottomSheet(
-              context: context,
-              builder: (context) => Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: const [
-                                      Text(
-                                        'Station: 1',
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        'AQI: N/A',
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 50.0),
-                                child: Divider(
-                                  thickness: 2,
-                                  color: Color.fromARGB(255, 15, 71, 7),
-                                ),
-                              ),
-                              Text(
-                                'Time: ${newestData['created_at']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'Latitude: $latThingspeak',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'Longitude: $lngThingspeak',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 50.0),
-                                child: Divider(
-                                  thickness: 2,
-                                  color: Color.fromARGB(255, 15, 71, 7),
-                                ),
-                              ),
-                              Text(
-                                'Temperature: ${newestData['field1']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'Humidity: ${newestData['field2']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'CO2: ${newestData['field3']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'CO: ${newestData['field4']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'PM2.5: ${newestData['field5']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'UV Index: ${newestData['field6']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                              Text(
-                                'Dewpoint: ${newestData['field7']}',
-                                style: const TextStyle(fontSize: 18),
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Icon(Icons.clear),
-                        ),
-                      ],
-                    ),
-                  )));
+          if (geoPoint.latitude == latHCM && geoPoint.longitude == longHCM) {
+            // This is the first marker (station 1)
+            showStation1BottomSheet(context);
+          } else if (geoPoint.latitude == latThuDuc &&
+              geoPoint.longitude == longThuDuc) {
+            // This is the second marker (station 2)
+            showStation2BottomSheet(context);
+          }
         },
         onLocationChanged: (location) {
           print(location);

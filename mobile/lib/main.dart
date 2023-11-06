@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Air Quality Monitoring App',
+      title: 'Air Quality Monitoring',
       // theme: ThemeData(
       //     inputDecorationTheme: const InputDecorationTheme(
       //       labelStyle: TextStyle(color: Colors.black),
