@@ -3,14 +3,14 @@ import "./co2Chart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { getDataOfCO2HCM } from "../../../apis/callAPI";
 import {
-  getDataOfCO2ThingSpeak,
   predictCO2WithLR,
   predictCO2WithGB,
   predictCO2WithXGB,
   predictCO2WithRF,
   predictCO2WithKNN,
-} from "../../../apis/callAPI";
+} from "../../../apis/callModelAPI";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
@@ -80,7 +80,7 @@ const CO2Chart = () => {
       "0"
     )}%2023:59:00`;
 
-    const result = await getDataOfCO2ThingSpeak(
+    const result = await getDataOfCO2HCM(
       formatInputStartDate,
       formatInputEndDate
     );

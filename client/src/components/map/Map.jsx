@@ -16,17 +16,26 @@ import L from "leaflet";
 
 import "./Map.css";
 
-import { getNewestDataHCM, getNewestDataThuDuc } from "../../apis/callAPI";
+import {
+  getNewestDataHCM,
+  getNewestDataThuDuc,
+  getWindHCM,
+  getWindThuDuc,
+} from "../../apis/callAPI";
 
 const Map = () => {
   //get newest data
   const [dataHCM, setDataHCM] = useState([]);
+  const [windHCM, setWindHCM] = useState([]);
   const [dataThuDuc, setDataThuDuc] = useState([]);
+  const [windThuDuc, setWindThuDuc] = useState([]);
 
   useEffect(() => {
     const getData = async () => {
       const response = await getNewestDataHCM();
+      const dataWindHCM = await getWindHCM();
       setDataHCM(response.feeds[0]);
+      setWindHCM(dataWindHCM.wind);
     };
     getData();
   }, []);
@@ -34,10 +43,13 @@ const Map = () => {
   useEffect(() => {
     const getData = async () => {
       const response = await getNewestDataThuDuc();
+      const dataWindTD = await getWindThuDuc();
       setDataThuDuc(response.feeds[0]);
+      setWindThuDuc(dataWindTD.wind);
     };
     getData();
   }, []);
+
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -73,6 +85,8 @@ const Map = () => {
       co: Math.round(dataHCM["field4"] * 1000) / 1000,
       dust: Math.round(dataHCM["field5"] * 1000) / 1000,
       uv: Math.round(dataHCM["field6"] * 1000) / 1000,
+      windDirection: windHCM.deg,
+      windSpeed: windHCM.speed,
       time: formatTimestamp(dataHCM["created_at"]),
     },
     {
@@ -85,6 +99,8 @@ const Map = () => {
       co: Math.round(dataHCM["field4"] * 1000) / 1000,
       dust: Math.round(dataHCM["field5"] * 1000) / 1000,
       uv: Math.round(dataHCM["field6"] * 1000) / 1000,
+      windDirection: windThuDuc.deg,
+      windSpeed: windThuDuc.speed,
       time: formatTimestamp(dataThuDuc["created_at"]),
     },
   ];
@@ -127,6 +143,8 @@ const Map = () => {
     dust,
     uv,
     time,
+    windDirection,
+    windSpeed,
   }) => (
     <Marker position={position}>
       <Popup>
@@ -194,6 +212,23 @@ const Map = () => {
         >
           UV Index: {uv}
         </span>
+        <br />
+        <span
+          style={{
+            fontSize: "1.2rem",
+          }}
+        >
+          Wind Direction: {windDirection}
+        </span>
+        <br />
+        <span
+          style={{
+            fontSize: "1.2rem",
+          }}
+        >
+          Wind Speed: {windSpeed}
+        </span>
+        <br />
       </Popup>
     </Marker>
   );
@@ -220,9 +255,9 @@ const Map = () => {
   };
 
   const customIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png", 
-    iconSize: [64, 64], 
-    iconAnchor: [32, 64], 
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png",
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
   });
 
   const TooltipMarker = ({ markers }) => {
@@ -248,6 +283,16 @@ const Map = () => {
           <span style={{ fontSize: "1.2rem" }}>Dust: {marker.dust} PPM</span>
           <br />
           <span style={{ fontSize: "1.2rem" }}>UV Index: {marker.uv}</span>
+          <br />
+          <span style={{ fontSize: "1.2rem" }}>
+            Wind Direction: {marker.windDirection} ° (N: 0°, E: 90°, S: 180°, W:
+            270°)
+          </span>
+          <br />
+          <span style={{ fontSize: "1.2rem" }}>
+            Wind Speed: {marker.windSpeed} m/s
+          </span>
+          <br />
         </Popup>
         <Tooltip direction="right" opacity={1}>
           <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
@@ -263,7 +308,7 @@ const Map = () => {
       <MapContainer center={firtsPosition} zoom={13} scrollWheelZoom={true}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
         />
 
         <LocationMarker />

@@ -3,14 +3,14 @@ import "./uvChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { getDataOfUVHCM, } from "../../../apis/callAPI";
 import {
-  getDataOfUVThingSpeak,
   predictUVWithLR,
   predictUVWithGB,
   predictUVWithXGB,
   predictUVWithRF,
   predictUVWithKNN,
-} from "../../../apis/callAPI";
+} from "../../../apis/callModelAPI";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
@@ -80,7 +80,7 @@ const UVChart = () => {
       "0"
     )}%2023:59:00`;
 
-    const result = await getDataOfUVThingSpeak(
+    const result = await getDataOfUVHCM(
       formatInputStartDate,
       formatInputEndDate
     );

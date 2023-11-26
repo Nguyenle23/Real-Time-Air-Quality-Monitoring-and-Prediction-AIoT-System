@@ -3,14 +3,14 @@ import "./pm25Chart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { getDataOfPM25HCM, } from "../../../apis/callAPI";
 import {
-  getDataOfPM25ThingSpeak,
   predictPM25WithLR,
   predictPM25WithGB,
   predictPM25WithXGB,
   predictPM25WithRF,
   predictPM25WithKNN,
-} from "../../../apis/callAPI";
+} from "../../../apis/callModelAPI";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
@@ -80,7 +80,7 @@ const PM25Chart = () => {
       "0"
     )}%2023:59:00`;
 
-    const result = await getDataOfPM25ThingSpeak(
+    const result = await getDataOfPM25HCM(
       formatInputStartDate,
       formatInputEndDate
     );

@@ -3,14 +3,14 @@ import "./coChart.css";
 
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { getDataOfCOHCM, } from "../../../apis/callAPI";
 import {
-  getDataOfCOThingSpeak,
   predictCOWithLR,
   predictCOWithGB,
   predictCOWithXGB,
   predictCOWithRF,
   predictCOWithKNN,
-} from "../../../apis/callAPI";
+} from "../../../apis/callModelAPI";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
@@ -80,7 +80,7 @@ const COChart = () => {
       "0"
     )}%2023:59:00`;
 
-    const result = await getDataOfCOThingSpeak(
+    const result = await getDataOfCOHCM(
       formatInputStartDate,
       formatInputEndDate
     );
