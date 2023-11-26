@@ -10,23 +10,47 @@ import {
   LayerGroup,
   Circle,
   Tooltip,
+  ZoomControl,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-import "./Map.css";
+import "./MapChart.css";
 
-import { getNewestDataHCM, getNewestDataThuDuc } from "../../apis/callAPI";
+import { formatTimestamp } from "../../utils/utilsDay";
+import {
+  getNewestDataHCM,
+  getNewestDataThuDuc,
+  getWindHCM,
+  getWindThuDuc,
+} from "../../apis/callAPI";
 
-const Map = () => {
-  //get newest data
+const MapChart = () => {
   const [dataHCM, setDataHCM] = useState([]);
+  const [windHCM, setWindHCM] = useState([]);
   const [dataThuDuc, setDataThuDuc] = useState([]);
+  const [windThuDuc, setWindThuDuc] = useState([]);
+  const firtsPosition = [10.762622, 106.660172];
+
+  const customIconMarker = new L.Icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png",
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
+  });
+
+  const customIconUserLocation = new L.Icon({
+    iconUrl:
+      "https://res.cloudinary.com/nguyenle23/image/upload/v1701012112/user-icon.png",
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
+  });
 
   useEffect(() => {
     const getData = async () => {
       const response = await getNewestDataHCM();
+      const dataWindHCM = await getWindHCM();
       setDataHCM(response.feeds[0]);
+      setWindHCM(dataWindHCM.wind);
     };
     getData();
   }, []);
@@ -34,34 +58,13 @@ const Map = () => {
   useEffect(() => {
     const getData = async () => {
       const response = await getNewestDataThuDuc();
+      const dataWindTD = await getWindThuDuc();
       setDataThuDuc(response.feeds[0]);
+      setWindThuDuc(dataWindTD.wind);
     };
     getData();
   }, []);
 
-  const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const hour = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-
-    const formattedDay = day.toString().padStart(2, "0");
-    const formattedMonth = month.toString().padStart(2, "0");
-    const formattedHour = hour.toString().padStart(2, "0");
-    const formattedMinutes = minutes.toString().padStart(2, "0");
-    const formattedSeconds = seconds.toString().padStart(2, "0");
-
-    const formattedDate = `${formattedDay}.${formattedMonth}.${year}`;
-    const formattedTime = `${formattedHour}:${formattedMinutes}:${formattedSeconds}`;
-
-    return `${formattedDate} - ${formattedTime}`;
-  };
-
-  //map data
-  const firtsPosition = [10.762622, 106.660172];
   const stationMarkers = [
     {
       key: "marker1",
@@ -73,6 +76,8 @@ const Map = () => {
       co: Math.round(dataHCM["field4"] * 1000) / 1000,
       dust: Math.round(dataHCM["field5"] * 1000) / 1000,
       uv: Math.round(dataHCM["field6"] * 1000) / 1000,
+      windDirection: windHCM.deg,
+      windSpeed: windHCM.speed,
       time: formatTimestamp(dataHCM["created_at"]),
     },
     {
@@ -85,6 +90,8 @@ const Map = () => {
       co: Math.round(dataHCM["field4"] * 1000) / 1000,
       dust: Math.round(dataHCM["field5"] * 1000) / 1000,
       uv: Math.round(dataHCM["field6"] * 1000) / 1000,
+      windDirection: windThuDuc.deg,
+      windSpeed: windThuDuc.speed,
       time: formatTimestamp(dataThuDuc["created_at"]),
     },
   ];
@@ -102,7 +109,7 @@ const Map = () => {
     });
 
     return position === null ? null : (
-      <Marker position={position}>
+      <Marker position={position} icon={customIconUserLocation}>
         <Popup>
           <span
             style={{
@@ -127,12 +134,14 @@ const Map = () => {
     dust,
     uv,
     time,
+    windDirection,
+    windSpeed,
   }) => (
     <Marker position={position}>
       <Popup>
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
             fontWeight: "bold",
           }}
         >
@@ -141,7 +150,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           Time: {time}
@@ -149,7 +158,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           Temperature: {temp} °C
@@ -157,7 +166,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           Humidity: {humi} %
@@ -165,7 +174,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           CO2: {co2} PPM
@@ -173,7 +182,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           CO: {co} PPM
@@ -181,7 +190,7 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           Dust: {dust} PPM
@@ -189,11 +198,28 @@ const Map = () => {
         <br />
         <span
           style={{
-            fontSize: "1.2rem",
+            fontSize: "0.8rem",
           }}
         >
           UV Index: {uv}
         </span>
+        <br />
+        <span
+          style={{
+            fontSize: "0.8rem",
+          }}
+        >
+          Wind Direction: {windDirection}
+        </span>
+        <br />
+        <span
+          style={{
+            fontSize: "0.8rem",
+          }}
+        >
+          Wind Speed: {windSpeed}
+        </span>
+        <br />
       </Popup>
     </Marker>
   );
@@ -219,38 +245,46 @@ const Map = () => {
     ));
   };
 
-  const customIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png", 
-    iconSize: [64, 64], 
-    iconAnchor: [32, 64], 
-  });
-
   const TooltipMarker = ({ markers }) => {
     return markers.map((marker) => (
-      <Marker key={marker.key} position={marker.position} icon={customIcon}>
+      <Marker
+        key={marker.key}
+        position={marker.position}
+        icon={customIconMarker}
+      >
         <Popup>
-          <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+          <span style={{ fontSize: "0.8rem", fontWeight: "bold" }}>
             {marker.children}
           </span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Time: {marker.time}</span>
+          <span style={{ fontSize: "0.8rem" }}>Time: {marker.time}</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>
+          <span style={{ fontSize: "0.8rem" }}>
             Temperature: {marker.temp} °C
           </span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Humidity: {marker.humi} %</span>
+          <span style={{ fontSize: "0.8rem" }}>Humidity: {marker.humi} %</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>CO2: {marker.co2} PPM</span>
+          <span style={{ fontSize: "0.8rem" }}>CO2: {marker.co2} PPM</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>CO: {marker.co} PPM</span>
+          <span style={{ fontSize: "0.8rem" }}>CO: {marker.co} PPM</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Dust: {marker.dust} PPM</span>
+          <span style={{ fontSize: "0.8rem" }}>Dust: {marker.dust} PPM</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>UV Index: {marker.uv}</span>
+          <span style={{ fontSize: "0.8rem" }}>UV Index: {marker.uv}</span>
+          <br />
+          <span style={{ fontSize: "0.8rem" }}>
+            Wind Direction: {marker.windDirection} ° (N: 0°, E: 90°, S: 180°, W:
+            270°)
+          </span>
+          <br />
+          <span style={{ fontSize: "0.8rem" }}>
+            Wind Speed: {marker.windSpeed} m/s
+          </span>
+          <br />
         </Popup>
         <Tooltip direction="right" opacity={1}>
-          <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+          <span style={{ fontSize: "0.5rem", fontWeight: "bold" }}>
             {marker.children}
           </span>
         </Tooltip>
@@ -260,16 +294,23 @@ const Map = () => {
 
   return (
     <div className="content-map">
-      <MapContainer center={firtsPosition} zoom={13} scrollWheelZoom={true}>
+      <MapContainer
+        zoomControl={false}
+        center={firtsPosition}
+        zoom={13}
+        scrollWheelZoom={true}
+      >
+        <ZoomControl position="bottomleft" />
+
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
         />
 
         <LocationMarker />
         <TooltipMarker markers={stationMarkers} />
 
-        <LayersControl position="topright">
+        <LayersControl position="bottomright">
           <LayersControl.Overlay checked name="Layer group with circles">
             <LayerGroup>
               <CircleMarkers markers={stationMarkers} />
@@ -281,4 +322,4 @@ const Map = () => {
   );
 };
 
-export default Map;
+export default MapChart;

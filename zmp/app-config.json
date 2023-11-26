@@ -2,17 +2,26 @@
   "app": {
     "title": "Quan trắc chất lượng không khí ",
     "headerTitle": "Quan trắc chất lượng không khí ",
-    "headerColor": "#1843EF",
+    "headerColor": {
+      "light": "#2b6130",
+      "dark": "#2b6130"
+    },
     "textColor": "white",
-    "statusBarColor": "#1843EF",
+    "statusBarColor": {
+      "light": "#2b6130",
+      "dark": "#2b6130"
+    },
     "leftButton": "back",
     "statusBar": "normal",
-    "actionBarHidden": true,
+    "actionBarHidden": false,
     "hideAndroidBottomNavigationBar": true,
-    "hideIOSSafeAreaBottom": true
+    "hideIOSSafeAreaBottom": true,
+    "textAlign": "left",
+    "selfControlLoading": false
   },
   "debug": false,
   "listCSS": [],
   "listSyncJS": [],
-  "listAsyncJS": []
+  "listAsyncJS": [],
+  "template": {}
 }

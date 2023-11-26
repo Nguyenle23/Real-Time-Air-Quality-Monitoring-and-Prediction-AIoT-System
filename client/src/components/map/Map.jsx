@@ -29,6 +29,19 @@ const Map = () => {
   const [windHCM, setWindHCM] = useState([]);
   const [dataThuDuc, setDataThuDuc] = useState([]);
   const [windThuDuc, setWindThuDuc] = useState([]);
+  const firtsPosition = [10.762622, 106.660172];
+
+  const customIconMarker = new L.Icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png",
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
+  });
+
+  const customIconUserLocation = new L.Icon({
+    iconUrl: "https://res.cloudinary.com/nguyenle23/image/upload/v1701012112/user-icon.png",
+    iconSize: [64, 64],
+    iconAnchor: [32, 64],
+  });
 
   useEffect(() => {
     const getData = async () => {
@@ -72,8 +85,6 @@ const Map = () => {
     return `${formattedDate} - ${formattedTime}`;
   };
 
-  //map data
-  const firtsPosition = [10.762622, 106.660172];
   const stationMarkers = [
     {
       key: "marker1",
@@ -118,7 +129,7 @@ const Map = () => {
     });
 
     return position === null ? null : (
-      <Marker position={position}>
+      <Marker position={position} icon={customIconUserLocation}>
         <Popup>
           <span
             style={{
@@ -253,16 +264,10 @@ const Map = () => {
       />
     ));
   };
-
-  const customIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/6938/6938996.png",
-    iconSize: [64, 64],
-    iconAnchor: [32, 64],
-  });
-
+  
   const TooltipMarker = ({ markers }) => {
     return markers.map((marker) => (
-      <Marker key={marker.key} position={marker.position} icon={customIcon}>
+      <Marker key={marker.key} position={marker.position} icon={customIconMarker}>
         <Popup>
           <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
             {marker.children}

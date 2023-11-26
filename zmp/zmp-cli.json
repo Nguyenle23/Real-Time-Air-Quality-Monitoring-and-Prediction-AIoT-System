@@ -8,8 +8,8 @@
   "template": "single-view",
   "theming": {
     "color": "#007aff",
-    "darkTheme": false,
-    "fillBars": false
+    "darkTheme": true,
+    "fillBars": true
   },
   "customBuild": false,
   "includeTailwind": false,
