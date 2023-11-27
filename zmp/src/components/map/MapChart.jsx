@@ -41,8 +41,8 @@ const MapChart = () => {
   const customIconUserLocation = new L.Icon({
     iconUrl:
       "https://res.cloudinary.com/nguyenle23/image/upload/v1701012112/user-icon.png",
-    iconSize: [64, 64],
-    iconAnchor: [32, 64],
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
   });
 
   useEffect(() => {
@@ -297,14 +297,14 @@ const MapChart = () => {
       <MapContainer
         zoomControl={false}
         center={firtsPosition}
-        zoom={13}
+        zoom={15}
         scrollWheelZoom={true}
       >
         <ZoomControl position="bottomleft" />
 
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png"
         />
 
         <LocationMarker />
