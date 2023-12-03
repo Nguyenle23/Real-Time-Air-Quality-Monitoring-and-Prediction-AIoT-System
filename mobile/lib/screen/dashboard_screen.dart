@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:graphic/graphic.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/timezone.dart' as tz;
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -55,10 +53,32 @@ class AirQualityDataThuDuc {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isMounted = false;
+
   AirQualityDataHCM _airQualityDataHCM = AirQualityDataHCM();
   AirQualityDataThuDuc _airQualityDataThuDuc = AirQualityDataThuDuc();
 
-  // get data from thingspeak
+  @override
+  void initState() {
+    _isMounted = true;
+    super.initState();
+    getDataHCM();
+    getDataThuDuc();
+    Timer.periodic(const Duration(minutes: 5), (timer) {
+      getDataHCM();
+      getDataThuDuc();
+    });
+  }
+
+  @override
+  void dispose() {
+    _isMounted = false;
+    super.dispose();
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+    ));
+  }
+
   getDataHCM() async {
     var url =
         "https://api.thingspeak.com/channels/2115707/feeds.json?results=1&timezone=Asia%2FBangkok";
@@ -67,64 +87,66 @@ class _DashboardScreenState extends State<DashboardScreen> {
       headers: {"Accept": "application/json"},
     );
 
-    var data = response.body;
-    var jsonData = json.decode(data);
-    var getFeed = jsonData['feeds'];
+    if (_isMounted) {
+      var data = response.body;
+      var jsonData = json.decode(data);
+      var getFeed = jsonData['feeds'];
 
-    double tempValue = double.parse(getFeed[0]['field1']);
-    double humiValue = double.parse(getFeed[0]['field2']);
-    double co2Value = double.parse(getFeed[0]['field3']);
-    double coValue = double.parse(getFeed[0]['field4']);
-    double pm25Value = double.parse(getFeed[0]['field5']);
-    double uvValue = double.parse(getFeed[0]['field6']);
+      double tempValue = double.parse(getFeed[0]['field1']);
+      double humiValue = double.parse(getFeed[0]['field2']);
+      double co2Value = double.parse(getFeed[0]['field3']);
+      double coValue = double.parse(getFeed[0]['field4']);
+      double pm25Value = double.parse(getFeed[0]['field5']);
+      double uvValue = double.parse(getFeed[0]['field6']);
 
-    String formattedTemp = tempValue.toStringAsFixed(1);
-    String formattedHumi = humiValue.toStringAsFixed(1);
-    String formattedCO2 = co2Value.toStringAsFixed(4);
-    String formattedCO = coValue.toStringAsFixed(4);
-    String formattedPM25 = pm25Value.toStringAsFixed(4);
-    String formattedUV = uvValue.toStringAsFixed(4);
+      String formattedTemp = tempValue.toStringAsFixed(1);
+      String formattedHumi = humiValue.toStringAsFixed(1);
+      String formattedCO2 = co2Value.toStringAsFixed(4);
+      String formattedCO = coValue.toStringAsFixed(4);
+      String formattedPM25 = pm25Value.toStringAsFixed(4);
+      String formattedUV = uvValue.toStringAsFixed(4);
 
-    // for (var i = 0; i < getFeed.length; i++) {
-    //   String dateTimeString = getFeed[i]['created_at'];
-    //   DateTime dateTime = DateTime.parse(dateTimeString);
-    //   String collectedDate = DateFormat('HH:mm').format(dateTime).toString();
-    //   String indeAir = getFeed[i]['field1'];
-    // }
+      // for (var i = 0; i < getFeed.length; i++) {
+      //   String dateTimeString = getFeed[i]['created_at'];
+      //   DateTime dateTime = DateTime.parse(dateTimeString);
+      //   String collectedDate = DateFormat('HH:mm').format(dateTime).toString();
+      //   String indeAir = getFeed[i]['field1'];
+      // }
 
-    //formate date
-    String dateTimeString = getFeed[0]['created_at'];
-    DateTime dateTime =
-        DateTime.parse(dateTimeString).toLocal(); // Convert to local time
-    String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
+      //formate date
+      String dateTimeString = getFeed[0]['created_at'];
+      DateTime dateTime =
+          DateTime.parse(dateTimeString).toLocal(); // Convert to local time
+      String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
 
-    // Load the Asia/Bangkok time zone
-    tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
+      // Load the Asia/Bangkok time zone
+      tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
 
-    // Convert the DateTime to Asia/Bangkok time zone
-    tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
+      // Convert the DateTime to Asia/Bangkok time zone
+      tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
 
-    // Get the day of the week in Asia/Bangkok time zone
-    String dayOfWeek =
-        DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
+      // Get the day of the week in Asia/Bangkok time zone
+      String dayOfWeek =
+          DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
 
-    //get the day-month-year in Asia/Bangkok time zone
-    String day =
-        DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
+      //get the day-month-year in Asia/Bangkok time zone
+      String day =
+          DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
 
-    // Format AM or PM in Asia/Bangkok time zone
-    String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
+      // Format AM or PM in Asia/Bangkok time zone
+      String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
 
-    setState(() {
-      _airQualityDataHCM = AirQualityDataHCM(
-          tempValue: formattedTemp,
-          humiValue: formattedHumi,
-          co2Value: formattedCO2,
-          coValue: formattedCO,
-          pm25Value: formattedPM25,
-          uvValue: formattedUV,
-          date: "$day || $dayOfWeek || $collectedDate $amPm");
-    });
+      setState(() {
+        _airQualityDataHCM = AirQualityDataHCM(
+            tempValue: formattedTemp,
+            humiValue: formattedHumi,
+            co2Value: formattedCO2,
+            coValue: formattedCO,
+            pm25Value: formattedPM25,
+            uvValue: formattedUV,
+            date: "$day || $dayOfWeek || $collectedDate $amPm");
+      });
+    }
   }
 
   getDataThuDuc() async {
@@ -137,84 +159,67 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     var data = response.body;
 
-    var jsonData = json.decode(data);
-    var getFeed = jsonData['feeds'];
+    if (_isMounted) {
+      var jsonData = json.decode(data);
+      var getFeed = jsonData['feeds'];
 
-    double tempValue = double.parse(getFeed[0]['field1']);
-    double humiValue = double.parse(getFeed[0]['field2']);
-    double co2Value = double.parse(getFeed[0]['field3']);
-    double coValue = double.parse(getFeed[0]['field4']);
-    double pm25Value = double.parse(getFeed[0]['field5']);
-    double uvValue = double.parse(getFeed[0]['field6']);
+      double tempValue = double.parse(getFeed[0]['field1']);
+      double humiValue = double.parse(getFeed[0]['field2']);
+      double co2Value = double.parse(getFeed[0]['field3']);
+      double coValue = double.parse(getFeed[0]['field4']);
+      double pm25Value = double.parse(getFeed[0]['field5']);
+      double uvValue = double.parse(getFeed[0]['field6']);
 
-    String formattedTemp = tempValue.toStringAsFixed(1);
-    String formattedHumi = humiValue.toStringAsFixed(1);
-    String formattedCO2 = co2Value.toStringAsFixed(4);
-    String formattedCO = coValue.toStringAsFixed(4);
-    String formattedPM25 = pm25Value.toStringAsFixed(4);
-    String formattedUV = uvValue.toStringAsFixed(4);
+      String formattedTemp = tempValue.toStringAsFixed(1);
+      String formattedHumi = humiValue.toStringAsFixed(1);
+      String formattedCO2 = co2Value.toStringAsFixed(4);
+      String formattedCO = coValue.toStringAsFixed(4);
+      String formattedPM25 = pm25Value.toStringAsFixed(4);
+      String formattedUV = uvValue.toStringAsFixed(4);
 
-    //formate date
-    String dateTimeString = getFeed[0]['created_at'];
-    DateTime dateTime =
-        DateTime.parse(dateTimeString).toLocal(); // Convert to local time
-    String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
+      //formate date
+      String dateTimeString = getFeed[0]['created_at'];
+      DateTime dateTime =
+          DateTime.parse(dateTimeString).toLocal(); // Convert to local time
+      String collectedDate = DateFormat('HH:mm:ss').format(dateTime).toString();
 
-    // Load the Asia/Bangkok time zone
-    tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
+      // Load the Asia/Bangkok time zone
+      tz.Location asiaBangkok = tz.getLocation('Asia/Bangkok');
 
-    // Convert the DateTime to Asia/Bangkok time zone
-    tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
+      // Convert the DateTime to Asia/Bangkok time zone
+      tz.TZDateTime asiaBangkokTime = tz.TZDateTime.from(dateTime, asiaBangkok);
 
-    // Get the day of the week in Asia/Bangkok time zone
-    String dayOfWeek =
-        DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
+      // Get the day of the week in Asia/Bangkok time zone
+      String dayOfWeek =
+          DateFormat('EEEE', 'en_US').format(asiaBangkokTime).toString();
 
-    //get the day-month-year in Asia/Bangkok time zone
-    String day =
-        DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
+      //get the day-month-year in Asia/Bangkok time zone
+      String day =
+          DateFormat('dd-MM-yyyy', 'en_US').format(asiaBangkokTime).toString();
 
-    // Format AM or PM in Asia/Bangkok time zone
-    String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
+      // Format AM or PM in Asia/Bangkok time zone
+      String amPm = DateFormat('a', 'en_US').format(asiaBangkokTime).toString();
 
-    setState(() {
-      _airQualityDataThuDuc = AirQualityDataThuDuc(
-          tempValue: formattedTemp,
-          humiValue: formattedHumi,
-          co2Value: formattedCO2,
-          coValue: formattedCO,
-          pm25Value: formattedPM25,
-          uvValue: formattedUV,
-          date: "$day || $dayOfWeek || $collectedDate $amPm");
-    });
+      setState(() {
+        _airQualityDataThuDuc = AirQualityDataThuDuc(
+            tempValue: formattedTemp,
+            humiValue: formattedHumi,
+            co2Value: formattedCO2,
+            coValue: formattedCO,
+            pm25Value: formattedPM25,
+            uvValue: formattedUV,
+            date: "$day || $dayOfWeek || $collectedDate $amPm");
+      });
+    }
   }
 
-  //auto refresh
-  @override
-  void initState() {
-    super.initState();
-    getDataHCM();
-    getDataThuDuc();
-    Timer.periodic(const Duration(minutes: 5), (timer) {
-      getDataHCM();
-      getDataThuDuc();
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(
@@ -363,7 +368,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       DataColumn(
                         label: Text(
-                          'Current Value',
+                          'Value',
                           style: TextStyle(fontSize: 24),
                           textAlign: TextAlign.center,
                         ),
@@ -714,7 +719,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       DataColumn(
                         label: Text(
-                          'Current Value',
+                          'Value',
                           style: TextStyle(fontSize: 24),
                           textAlign: TextAlign.center,
                         ),
@@ -910,61 +915,61 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ])),
 
             //button predict
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 5,
-                left: 100,
-                right: 100,
-              ),
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black,
-                      offset: Offset.zero,
-                      blurRadius: 1,
-                      blurStyle: BlurStyle.outer,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                                builder: (context) => const DashboardScreen()),
-                          );
-                        },
-                        child: const Text(
-                          'More Details',
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(
+            //     top: 5,
+            //     left: 100,
+            //     right: 100,
+            //   ),
+            //   child: Container(
+            //     height: 50,
+            //     decoration: BoxDecoration(
+            //       color: Colors.black,
+            //       border: Border.all(
+            //         color: Colors.black,
+            //         width: 2,
+            //       ),
+            //       borderRadius: BorderRadius.circular(15),
+            //       boxShadow: const [
+            //         BoxShadow(
+            //           color: Colors.black,
+            //           offset: Offset.zero,
+            //           blurRadius: 1,
+            //           blurStyle: BlurStyle.outer,
+            //         ),
+            //       ],
+            //     ),
+            //     child: Row(
+            //       children: <Widget>[
+            //         Expanded(
+            //           child: TextButton(
+            //             style: TextButton.styleFrom(
+            //               backgroundColor: Colors.green,
+            //               shape: RoundedRectangleBorder(
+            //                 borderRadius: BorderRadius.circular(15),
+            //               ),
+            //             ),
+            //             onPressed: () {
+            //               Navigator.push(
+            //                 context,
+            //                 CupertinoPageRoute(
+            //                     builder: (context) => const DashboardScreen()),
+            //               );
+            //             },
+            //             child: const Text(
+            //               'More Details',
+            //               style: TextStyle(
+            //                   color: Colors.black,
+            //                   fontSize: 25,
+            //                   fontWeight: FontWeight.bold),
+            //               textAlign: TextAlign.center,
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

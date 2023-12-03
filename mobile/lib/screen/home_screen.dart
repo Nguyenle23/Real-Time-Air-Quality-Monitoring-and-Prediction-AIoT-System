@@ -6,7 +6,7 @@ import 'package:iu_air_quality/screen/setting_screen.dart';
 import 'package:iu_air_quality/screen/info_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -35,27 +35,16 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.green[800],
-        title: Row(
+        title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            // Center(
-            //   child: Image(
-            //     image: AssetImage('assets/images/.png'),
-            //     height: 40,
-            //     width: 40,
-            //   ),
-            // ),
-            // SizedBox(
-            //   width: 10,
-            // ),
+          children: [
             Center(
               child: Text(
-                'Air Quality Monitoring',
+                'AIAir Quality Monitoring',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontFamily: 'Kanit Medium 500'
-                ),
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontFamily: 'Kanit Medium 500'),
               ),
             ),
           ],
@@ -73,7 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
         iconSize: 25,
         currentIndex: _selectedIndex, //New
         onTap: _onItemTapped,
-        unselectedItemColor: const Color.fromARGB(255, 236, 236, 236).withOpacity(0.5),
+        unselectedItemColor:
+            const Color.fromARGB(255, 236, 236, 236).withOpacity(0.5),
         selectedItemColor: Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -102,3 +92,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+

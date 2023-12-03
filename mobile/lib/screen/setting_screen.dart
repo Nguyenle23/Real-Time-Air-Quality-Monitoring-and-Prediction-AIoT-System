@@ -195,9 +195,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Icons.info_outline,
                   size: 30,
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const Spacer(),
                 const Text(
                   'General Information',
                   style: TextStyle(
@@ -230,9 +228,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Icons.cable_outlined,
                   size: 30,
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const Spacer(),
                 const Text(
                   'Technologies',
                   style: TextStyle(
