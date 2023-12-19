@@ -6,6 +6,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 // import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:iu_air_quality/src/constants/constant_color.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class MapScreen extends StatefulWidget {
@@ -16,6 +17,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final ConstantColor _constants = ConstantColor();
+
   late MapController controller;
   List _markers = [];
   Map<String, dynamic> newestDataHCM = {};
@@ -152,9 +155,12 @@ class _MapScreenState extends State<MapScreen> {
               ElevatedButton(
                 style: const ButtonStyle(
                     backgroundColor:
-                        MaterialStatePropertyAll<Color>(Colors.green)),
+                        MaterialStatePropertyAll<Color>(Colors.blue)),
                 child: const Text(
                   "Got it",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(context);
@@ -224,12 +230,14 @@ class _MapScreenState extends State<MapScreen> {
 }
 
 class ZoomNavigation extends StatelessWidget {
-  const ZoomNavigation({
+  ZoomNavigation({
     super.key,
     required this.controller,
+    
   });
   final MapController controller;
-
+  final ConstantColor _constants = ConstantColor();
+  
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -242,7 +250,7 @@ class ZoomNavigation extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: _constants.tertiaryColor,
               padding: EdgeInsets.zero,
             ),
             child: const Center(
@@ -264,7 +272,7 @@ class ZoomNavigation extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: _constants.tertiaryColor,
               padding: EdgeInsets.zero,
             ),
             child: const Center(
@@ -502,13 +510,13 @@ void _showStationDetails(
 }
 
 class PointerInterceptor extends StatelessWidget {
-  const PointerInterceptor({
+  PointerInterceptor({
     required this.child,
     this.intercepting = true,
     this.debug = false,
     super.key,
   });
-
+  final ConstantColor _constants = ConstantColor();
   final Widget child;
   final bool intercepting;
   final bool debug;
@@ -520,12 +528,14 @@ class PointerInterceptor extends StatelessWidget {
 }
 
 class ActivationUserLocation extends StatelessWidget {
+  final ConstantColor _constants = ConstantColor();
+
   final ValueNotifier<bool> showFab;
   final ValueNotifier<bool> trackingNotifier;
   final MapController controller;
   final ValueNotifier<IconData> userLocationIcon;
 
-  const ActivationUserLocation({
+  ActivationUserLocation({
     super.key,
     required this.showFab,
     required this.trackingNotifier,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iu_air_quality/screen/setting_screen.dart';
+import 'package:iu_air_quality/src/constants/constant_color.dart';
 
 class GeneralInfoScreen extends StatefulWidget {
   const GeneralInfoScreen({super.key});
@@ -9,14 +9,15 @@ class GeneralInfoScreen extends StatefulWidget {
 }
 
 class _GeneralInfoScreenState extends State<GeneralInfoScreen> {
+  final ConstantColor _constantColor = ConstantColor();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green[800],
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+      backgroundColor: _constantColor.tertiaryColor,
+      body: const SingleChildScrollView(
+        padding:  EdgeInsets.all(20),
         child: Column(
-          children: const [
+          children: [
             //About
             SizedBox(
               height: 40,

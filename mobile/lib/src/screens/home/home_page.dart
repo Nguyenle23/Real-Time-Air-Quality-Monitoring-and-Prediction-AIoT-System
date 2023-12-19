@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:iu_air_quality/screen/dashboard_screen.dart';
-import 'package:iu_air_quality/screen/map_screen.dart';
-import 'package:iu_air_quality/screen/chart_screen.dart';
-import 'package:iu_air_quality/screen/setting_screen.dart';
-import 'package:iu_air_quality/screen/info_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:iu_air_quality/src/screens/chart/chart_screen.dart';
+import 'package:iu_air_quality/src/screens/dashboard/dashboard_screen.dart';
+import 'package:iu_air_quality/src/screens/info/info_screen.dart';
+import 'package:iu_air_quality/src/screens/map/map_screen.dart';
+import 'package:iu_air_quality/src/screens/setting/setting_screen.dart';
+import 'package:iu_air_quality/src/constants/constant_color.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomePageState extends State<HomePage> {
+  final ConstantColor _constants = ConstantColor();
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -30,11 +33,23 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.green[800],
+        backgroundColor: _constants.tertiaryColor,
         title: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -59,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: _pages.elementAt(_selectedIndex), //New
       ),
       bottomNavigationBar: BottomNavigationBar(
-        iconSize: 25,
+        iconSize: 24,
         currentIndex: _selectedIndex, //New
         onTap: _onItemTapped,
         unselectedItemColor:
@@ -67,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            backgroundColor: Colors.green[800],
+            backgroundColor: _constants.tertiaryColor,
             icon: const Icon(Icons.dashboard_outlined),
             label: 'Dashboard',
           ),
@@ -92,5 +107,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-

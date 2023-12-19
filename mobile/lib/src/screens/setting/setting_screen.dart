@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:iu_air_quality/screen/sub_setting/general_info_screen.dart';
+import 'package:iu_air_quality/src/screens/setting/sub_setting/general_info_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -9,43 +10,37 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: false,
-      //   title: Row(
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: const [
-      //       Center(
-      //         child: Image(
-      //           image: AssetImage('assets/images/faviconIU1.png'),
-      //           height: 40,
-      //           width: 40,
-      //           // color: Colors.white,
-      //         ),
-      //       ),
-      //       SizedBox(
-      //         width: 10,
-      //       ),
-      //       Center(
-      //         child: Text(
-      //           'Air Quality App',
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //             fontSize: 25,
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      //   shape: const RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.vertical(
-      //       bottom: Radius.circular(20),
-      //     ),
-      //   ),
-      // ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(
           top: 20,
@@ -171,7 +166,7 @@ class _SettingScreenState extends State<SettingScreen> {
             Row(
               children: const [
                 Text(
-                  'IU Air Quality App',
+                  'AIAir Information',
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
@@ -245,6 +240,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     size: 30,
                   ),
                 ),
+                
               ],
             ),
             Row(
@@ -307,19 +303,19 @@ class _SettingScreenState extends State<SettingScreen> {
             //version number
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children:  [
                 Image(
                   image: AssetImage('assets/images/LogoAIoT.png'),
-                  height: 95,
-                  width: 95,
+                  height: 80,
+                  width: 80,
                 ),
                 SizedBox(
                   height: 10,
                 ),
                 Text(
-                  'Version: 0.0.2',
+                  _packageInfo.version,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 15,
                   ),
                 ),
               ],

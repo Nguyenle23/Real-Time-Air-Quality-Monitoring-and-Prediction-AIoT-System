@@ -59,8 +59,8 @@ class _ChartScreenState extends State<ChartScreen> {
           DateFormat('yyyy-MM-dd 23:59:00').format(DateTime.now().toUtc());
 
       final String urlTemp =
-          "https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
-
+          "https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+      print(urlTemp);
       // final String urlHumi =
       //     "https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
 
