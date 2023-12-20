@@ -122,8 +122,8 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     controller = MapController(
       initPosition: GeoPoint(
-        latitude: 10.7936588867,
-        longitude: 106.6803109431,
+        latitude: 10.8619784,
+        longitude: 106.8034464,
       ),
     );
     getData();
@@ -498,7 +498,7 @@ void _showStationDetails(
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('Close'),
+            child: const Text('Close', style: TextStyle(color: Colors.blue)),
             onPressed: () {
               Navigator.of(context).pop();
             },

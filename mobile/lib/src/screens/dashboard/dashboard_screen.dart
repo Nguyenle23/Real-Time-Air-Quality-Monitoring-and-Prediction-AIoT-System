@@ -75,10 +75,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       String formattedTemp = tempValue.toStringAsFixed(1);
       String formattedHumi = humiValue.toStringAsFixed(1);
-      String formattedCO2 = co2Value.toStringAsFixed(2);
-      String formattedCO = coValue.toStringAsFixed(2);
-      String formattedPM25 = pm25Value.toStringAsFixed(2);
-      String formattedUV = uvValue.toStringAsFixed(2);
+      String formattedCO2 = co2Value.toStringAsFixed(1);
+      String formattedCO = coValue.toStringAsFixed(1);
+      String formattedPM25 = pm25Value.toStringAsFixed(1);
+      String formattedUV = uvValue.toStringAsFixed(1);
 
       //formate date
       String dateTimeString = getFeed[0]['created_at'];
@@ -126,10 +126,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       String formattedTempTD = tempValueTD.toStringAsFixed(1);
       String formattedHumiTD = humiValueTD.toStringAsFixed(1);
-      String formattedCO2TD = co2ValueTD.toStringAsFixed(2);
-      String formattedCOTD = coValueTD.toStringAsFixed(2);
-      String formattedPM25TD = pm25ValueTD.toStringAsFixed(2);
-      String formattedUVTD = uvValueTD.toStringAsFixed(2);
+      String formattedCO2TD = co2ValueTD.toStringAsFixed(1);
+      String formattedCOTD = coValueTD.toStringAsFixed(1);
+      String formattedPM25TD = pm25ValueTD.toStringAsFixed(1);
+      String formattedUVTD = uvValueTD.toStringAsFixed(1);
 
       //formate date
       String dateTimeString = getFeed[0]['created_at'];
