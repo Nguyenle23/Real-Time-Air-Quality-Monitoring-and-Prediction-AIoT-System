@@ -185,11 +185,11 @@ const COChart = () => {
       ],
     },
     plotOptions: {
-      // line: {
-      //   dataLabels: {
-      //     enabled: true,
-      //   },
-      // },
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },
@@ -200,19 +200,16 @@ const COChart = () => {
         },
       },
     },
-
-    // legend: {
-    //   layout: "vertical",
-    //   align: "right",
-    //   verticalAlign: "middle",
-    //   itemMarginTop: 10,
-    //   itemMarginBottom: 10,
-    // },
     series: [
       {
         type: "line",
         name: "Ho Chi Minh City",
         data: chartData.seriesData,
+      },
+      {
+        type: "line",
+        name: "Thu Duc City",
+        // data: chartDataThuDuc.seriesData,
       },
     ],
   };

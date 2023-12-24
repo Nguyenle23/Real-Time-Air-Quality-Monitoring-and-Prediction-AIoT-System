@@ -1,4 +1,5 @@
 import { fetchDataTempHCM } from "../data/dataTemp";
+import { predictGBFunction } from "./modelForcasting";
 
 export const options = [
   { value: "SVR", label: "SVR" },
@@ -23,7 +24,10 @@ export const selectOption = (option) => {
       predictRFFunction();
       break;
     case "GB":
-      predictGBFunction();
+      console.log("gb");
+      predictGBFunction().then((err, result) => {
+        console.log(result)
+      })
       break;
     case "XGB":
       predictXGBFunction();
@@ -42,7 +46,7 @@ export const selectOption = (option) => {
   }
 };
 
-const predictLRFunction = async () => {
+export const predictLRFunction = async () => {
   fetchDataTempHCM().then(async (result) => {
     const data = result.data.feeds.map((item) => parseFloat(item.field1));
 
@@ -108,76 +112,8 @@ const predictLRFunction = async () => {
   });
 };
 
-const predictGBFunction = async () => {
-  fetchDataTempHCM().then(async (result) => {
-    const data = result.data.feeds.map((item) => parseFloat(item.field1));
 
-    const time = [
-      ...result.data.feeds.map((item) => {
-        return item.created_at;
-      }),
-    ];
-
-    const dataTemp = await predictTempWithGB(time);
-    const resultPredict = dataTemp.data;
-
-    const formatTime = result.data.feeds.map((item) => {
-      const date = new Date(item.created_at);
-
-      // Convert UTC time to Asia/Bangkok time zone
-      const options = {
-        timeZone: "Asia/Bangkok",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      };
-
-      const formatter = new Intl.DateTimeFormat("en-US", options);
-      const bangkokTime = formatter.format(date);
-      const hour = parseInt(bangkokTime.split(":")[0], 10);
-
-      const adjustedHour = hour % 12 === 0 ? 12 : hour % 12;
-      const amPm = getAmPm(hour);
-
-      return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
-    });
-
-    //next hour based on time of last data point
-    const lastDataPointTime = new Date(
-      result.data.feeds[result.data.feeds.length - 1].created_at
-    );
-
-    const options = {
-      timeZone: "Asia/Bangkok",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    };
-
-    const formatter = new Intl.DateTimeFormat("en-US", options);
-    const bangkokTime = formatter.format(lastDataPointTime);
-
-    const hour = parseInt(bangkokTime.split(":")[0], 10);
-    const nextHour = new Date(lastDataPointTime);
-    nextHour.setHours(hour + 1);
-
-    // Convert to 12-hour format with AM/PM notation
-    let adjustedHour = nextHour.getHours() % 12;
-    adjustedHour = adjustedHour === 0 ? 12 : adjustedHour; // Handle 12 AM
-
-    const amPm = nextHour.getHours() < 12 ? "AM" : "PM"; // Determine AM or PM
-
-    formatTime.push(`${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`);
-
-    setCheckPredict(true);
-    setPredictData({
-      timeData: formatTime,
-      seriesData: data.concat(resultPredict),
-    });
-  });
-};
-
-const predictRFFunction = async () => {
+export const predictRFFunction = async () => {
   fetchDataTempHCM().then(async (result) => {
     const data = result.data.feeds.map((item) => parseFloat(item.field1));
 
@@ -246,7 +182,7 @@ const predictRFFunction = async () => {
   });
 };
 
-const predictXGBFunction = async () => {
+export const predictXGBFunction = async () => {
   fetchDataTempHCM().then(async (result) => {
     const data = result.data.feeds.map((item) => parseFloat(item.field1));
 
@@ -315,7 +251,7 @@ const predictXGBFunction = async () => {
   });
 };
 
-const predictKNNFunction = async () => {
+export const predictKNNFunction = async () => {
   fetchDataTempHCM().then(async (result) => {
     const data = result.data.feeds.map((item) => parseFloat(item.field1));
 
@@ -384,7 +320,7 @@ const predictKNNFunction = async () => {
   });
 };
 
-const predictTESTFunction = async () => {
+export const predictTESTFunction = async () => {
   fetchDataTempHCM().then(async (result) => {
     const data = result.data.feeds.map((item) => parseFloat(item.field1));
 

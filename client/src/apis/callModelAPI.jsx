@@ -9,9 +9,10 @@ export const predictTempWithLR = async (data) => {
 };
 
 export const predictTempWithGB = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/gb/temp", {
+  const response = await axios.post("https://air-quality-app-04a39fccf317.herokuapp.com//predict/gb/temp", {
     dataTemp: data,
   });
+  console.log(response)
   return response;
 };
 

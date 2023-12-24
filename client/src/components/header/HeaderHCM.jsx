@@ -9,6 +9,7 @@ import locationMark from "../../assets/location.png";
 import { getNewestDataHCM, getNewestDataThuDuc } from "../../apis/callAPI";
 
 import "./HeaderHCM.css";
+import { convertToBangkokTime } from "../../utils/utilDay";
 
 const HeaderHCM = () => {
   const [dataHCM, setDataHCM] = useState([]);
@@ -80,45 +81,12 @@ const HeaderHCM = () => {
     getData();
   }, []);
 
-  const formatStringtoTime = (str) => {
-    // var date = new Date(str);
-    // var hour = date.getUTCHours();
-    // var minute = date.getUTCMinutes();
-    // var second = date.getUTCSeconds();
-    // hour = hour < 10 ? `0${hour}` : hour;
-    // minute = minute < 10 ? `0${minute}` : minute;
-    // second = second < 10 ? `0${second}` : second;
-
-    // //check if the time is AM or PM
-    // const midday = hour >= 12 ? "PM" : "AM";
-    // hour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-
-    // return `${hour}:${minute}:${second} ${midday}`;
-    const options = {
-      timeZone: "Asia/Bangkok",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    };
-  
-    const date = new Date(str);
-    const formatter = new Intl.DateTimeFormat("en-US", options);
-    const bangkokTime = formatter.format(date);
-  
-    const hour = date.getHours();
-    const amPm = hour >= 12 ? "PM" : "AM";
-    const adjustedHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-  
-    return `${adjustedHour}:${bangkokTime.slice(3)} ${amPm}`;
-  };
-
   return (
     <div className="header">
       <div className="location">
         <img className="location-icon" src={locationMark} alt="icon" />
         <h3 className="location-text">
-          {timeHCM ? formatStringtoTime(timeHCM) + " | " : " Loading ...| "}
+          {timeHCM ? convertToBangkokTime(timeHCM).hour + ":" + convertToBangkokTime(timeHCM).minute + " " + convertToBangkokTime(timeHCM).amPm + " | ": "Loading..."}
           Phu Nhuan District, Ho Chi Minh City
         </h3>
       </div>

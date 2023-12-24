@@ -102,7 +102,7 @@ const Map = () => {
     },
     {
       key: "marker2",
-      position: [10.8619784, 106.8034464],
+      position: [10.86748937028891,  106.79438149449618],
       children: "Station 2 - Thu Duc City",
       temp: Math.round(dataHCM["field1"] * 1000) / 1000,
       humi: Math.round(dataHCM["field2"] * 1000) / 1000,
@@ -269,32 +269,32 @@ const Map = () => {
     return markers.map((marker) => (
       <Marker key={marker.key} position={marker.position} icon={customIconMarker}>
         <Popup>
-          <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
+          <span style={{ fontSize: "1.3rem", fontWeight: "bold" }}>
             {marker.children}
           </span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Time: {marker.time}</span>
+          <span style={{ fontSize: "1.3rem" }}>Time: {marker.time}</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>
+          <span style={{ fontSize: "1.3rem" }}>
             Temperature: {marker.temp} °C
           </span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Humidity: {marker.humi} %</span>
+          <span style={{ fontSize: "1.3rem" }}>Humidity: {marker.humi} %</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>CO2: {marker.co2} PPM</span>
+          <span style={{ fontSize: "1.3rem" }}>CO2: {marker.co2} ppm</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>CO: {marker.co} PPM</span>
+          <span style={{ fontSize: "1.3rem" }}>CO: {marker.co} ppm</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>Dust: {marker.dust} PPM</span>
+          <span style={{ fontSize: "1.3rem" }}>Dust: {marker.dust} ppm</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>UV Index: {marker.uv}</span>
+          <span style={{ fontSize: "1.3rem" }}>UV Index: {marker.uv} mW/m2</span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>
+          <span style={{ fontSize: "1.3rem" }}>
             Wind Direction: {marker.windDirection} ° (N: 0°, E: 90°, S: 180°, W:
             270°)
           </span>
           <br />
-          <span style={{ fontSize: "1.2rem" }}>
+          <span style={{ fontSize: "1.3rem" }}>
             Wind Speed: {marker.windSpeed} m/s
           </span>
           <br />

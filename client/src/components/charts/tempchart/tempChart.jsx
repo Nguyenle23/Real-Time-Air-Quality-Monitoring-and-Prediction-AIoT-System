@@ -7,9 +7,10 @@ import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
 import { formatDate, convertToBangkokTime } from "../../../utils/utilDay";
-import { options, selectOption } from "../../../utils/utilOptionModel";
+import { options } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
+import { predictGBFunction } from "../../../utils/modelForcasting";
 
 const TempChart = () => {
   const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
@@ -200,6 +201,45 @@ const TempChart = () => {
 
   const realtimeFunction = () => {
     setCheckPredict(false);
+  };
+
+  const selectOption = (option) => {
+    switch (option.value) {
+      case "SVR":
+        alert("SVR is not available now");
+        break;
+      case "SARIMA":
+        alert("SARIMA is not available now");
+        break;
+      case "RF":
+        predictRFFunction();
+        break;
+      case "GB":
+        console.log("gb");
+        predictGBFunction().then(async (result) => {
+          console.log(result);
+          setCheckPredict(true);
+          setPredictData({
+            timeData: result.timeData,
+            seriesData: result.seriesData,
+          });
+        });
+        break;
+      case "XGB":
+        predictXGBFunction();
+        break;
+      case "LR":
+        predictLRFunction();
+        break;
+      case "KNN":
+        predictKNNFunction();
+        break;
+      case "TEST":
+        predictTESTFunction();
+        break;
+      default:
+        break;
+    }
   };
 
   useEffect(() => {

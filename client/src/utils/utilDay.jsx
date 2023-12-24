@@ -42,14 +42,16 @@ export const getAmPm = (hour) => {
   return hour >= 12 ? "PM" : "AM";
 };
 
-export const convertToBangkokTime = (date) => {
+export const convertToBangkokTime = (dateInput) => {
   const options = {
     timeZone: "Asia/Bangkok",
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
     hour12: false,
   };
 
+  const date = new Date(dateInput);
   const formatter = new Intl.DateTimeFormat("en-US", options);
   const bangkokTime = formatter.format(date);
   const hour = parseInt(bangkokTime.split(":")[0], 10);

@@ -71,6 +71,14 @@ export const getDataOfCO2HCM = async (start, end) => {
   return response;
 };
 
+export const getDataOfCO2TD = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2239030/fields/3.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
+  );
+  return response;
+};
+
+
 //------------CO----------------
 export const getDataOfCOHCM = async (start, end) => {
   const response = await axios.get(

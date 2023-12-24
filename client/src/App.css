@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400&family=Montserrat:wght@400;500;700;800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap');
 
 * {
   margin: 0;
@@ -11,28 +11,9 @@ html {
 }
 
 body {
-  background: linear-gradient(
-    0deg,
-    rgba(43, 97, 48, 1) 20%,
-    rgba(63, 133, 70, 1) 44%,
-    rgba(83, 168, 91, 1) 65%,
-    rgba(255, 255, 255, 1) 95%
-  );
-  background-repeat: no-repeat;
-  font-family: "Montserrat", sans-serif;
+  background: linear-gradient(0deg, rgba(32,92,241,1) 44%, rgba(107,157,252,1) 65%, rgba(255,255,255,1) 85%);
+  font-family: 'Quicksand', sans-serif;
   font-size: 1.6rem;
-
-  /* disable overflow */
-  /* overflow: hidden; */
-}
-
-.container {
-  margin: auto;
-  width: 90%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  height: 60vh;
-  flex: 1;
 }
 
 .container-map-chart {
@@ -42,6 +23,45 @@ body {
   overflow-x: hidden;
   height: 60vh;
   flex: 1;
+}
+
+.container-chart {
+  margin: auto;
+  width: 96vw;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 60vh;
+  flex: 1;
+}
+
+.container-header {
+  flex: 1;
+  justify-content: space-between;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.slider-controls {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.slider-controls button {
+  padding: 10px 20px;
+  margin: 0 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #205cf1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 5px;
+}
+
+.slider-controls button:hover {
+  color: #fff;
+  background-color: #0d3aaf;
 }
 
 /* width */
@@ -58,11 +78,11 @@ body {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #53535396;
+  background: #6b9dfc;
   border-radius: 10px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #535353;
+  background: #4b6dad;
 }

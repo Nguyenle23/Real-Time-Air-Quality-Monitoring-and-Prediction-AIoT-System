@@ -8,15 +8,13 @@ import PM25Chart from "./pm25chart/pm25Chart";
 
 const Chart = () => {
   return (
-    <div className="general-container">
-      <div className="full-chart">
-        <TempChart />
-        <HumiChart />
-        <CO2Chart />
-        <COChart />
-        <UVChart />
-        <PM25Chart />
-      </div>
+    <div className="full-chart">
+      <TempChart />
+      <HumiChart />
+      <CO2Chart />
+      <COChart />
+      <UVChart />
+      <PM25Chart />
     </div>
   );
 };
