@@ -85,38 +85,38 @@ const Navbar = () => {
           {
             question: "What is the AIAir Quality System?",
             answer:
-              "The AIAir Quality System is a system that allows you to monitor the air quality in your home or office. It also allows you to control the air quality by turning on or off the air purifier or the air conditioner.",
+              "The AIAir Quality System is a system that allows you to monitor the air quality in your home or office. It also allows you to monitor in real-time and forcaste the air quality through web and mobile applications.",
           },
           {
             question: "How does the AIAir Quality System work?",
             answer:
-              "The AIAir Quality System works by using a sensor to measure the air quality in your home or office. It then sends the data to the AIAir Quality System server, which then sends the data to the AIAir Quality System app. The AIAir Quality System app then displays the data in a graph.",
+              "The AIAir Quality System works by using a hardware device with multiple environmental sensors to measure each toxic components include temperature, humidity, co2 value, co value, pm2.5 and uv index. It then sends the data to the AIAir Quality System server, which then sends the data to both web and mobile AIAir Quality System application. The AIAir Quality System app then displays the data in a graph and map.",
           },
           {
             question:
               "What are the benefits of using the AIAir Quality System?",
             answer:
-              "The AIAir Quality System allows you to monitor the air quality in your home or office. It also allows you to control the air quality by turning on or off the air purifier or the air conditioner.",
+              "The AIAir Quality System allows you to monitor the air quality in real-time. It also allows you to forecast the air quality by choose the time you want to forecast or the algorithms to forecast.",
           },
           {
             question: "How much does the AIAir Quality System cost?",
             answer:
-              "The AIAir Quality System costs $99.99. It also requires a monthly subscription of $9.99.",
+              "The AIAir Quality System current operates on a free basis.",
           },
           {
             question: "How do I install the AIAir Quality System?",
             answer:
-              "The AIAir Quality System is easy to install. All you have to do is plug it in and download the AIAir Quality System app.",
+              "The AIAir Quality System is easy to install. All you have to do is searching it on Google Play Store with \"AIAir Quality App\" and download it.",
           },
           {
             question: "How do I use the AIAir Quality System?",
             answer:
-              "The AIAir Quality System is easy to use. All you have to do is open the AIAir Quality System app and follow the instructions.",
+              "The AIAir Quality System is easy to use. All you have to do is accessing the web application via https://www.aiair-aiotlabvn.tech/ and use it.",
           },
           {
             question: "How do I contact customer support?",
             answer:
-              "You can contact customer support by emailing us at AIoTLabVN",
+              "You can contact customer support by emailing us at AIoTLabVN on facebook, linkedin and our websize: https://aiotlab.vn/",
           },
         ],
       },
@@ -132,8 +132,9 @@ const Navbar = () => {
             developers: "AIAir is developed by AIoTLabVN, a group of students from the University of Science, Vietnam National University Ho Chi Minh City.",
             majors: "AIAir is bachelor's thesis of the following students: Le Nguyen Binh Nguyen with supervisor Dr. Le Duy Tan with supervisor.",
             contact: "If you have any questions, please contact us at AIoTLabVN",
-            logoAIoTLabVN: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403333/aiot_logo_rmbg_uyord7.png",
             logoAIAir: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403428/aiair_femkrw.png",
+            logoAIoTLabVN: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403333/aiot_logo_rmbg_uyord7.png",
+            qrCode: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403332/qr_rmbg_jw4jix.png",
           },
         ],
       },
@@ -203,8 +204,8 @@ const Navbar = () => {
                 <table className="modal-content-table">
                   <thead>
                     <tr>
-                      <th>Range</th>
                       <th></th>
+                      <th>Range</th>
                       <th>Quality Assessment</th>
                       <th>Description</th>
                     </tr>
@@ -237,7 +238,7 @@ const Navbar = () => {
                         <span>Link paper: Update soon</span>
                       ) : (
                         <>
-                          Link paper:
+                          Link paper: 
                           <a href={item.link} target="_blank" rel="noreferrer">
                             {item.link}
                           </a>
@@ -274,9 +275,11 @@ const Navbar = () => {
                     <div className="modal-answer">
                       <span>4. {item.contact}</span>
                     </div>
+                    <br />
                     <div className="modal-content-item__logo">
-                      <img src={item.logoAIoTLabVN} alt="logo_aiot_lab_vn" />
+                      <img src={item.qrCode} alt="qr_code" />
                       <img src={item.logoAIAir} alt="logo_aiair" />
+                      <img style={{height: '100px', width: '90px', objectFit: 'cover'}} src={item.logoAIoTLabVN} alt="logo_aiot_lab_vn" />
                     </div>
                     <br />
                   </div>

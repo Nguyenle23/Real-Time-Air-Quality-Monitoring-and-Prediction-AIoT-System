@@ -1,11 +1,13 @@
 import React from "react";
 import { FaFacebook, FaGithub, FaGooglePlay, FaLinkedin } from "react-icons/fa";
-import qrGooglePlay from "../../assets/qr_aiair_google_play.png";
 import "./footer.css";
 
 const Footer = () => {
   return (
     <div className="footer">
+      <p>
+        © 2024 AIoT Lab. All rights reserved.{" "}
+      </p>
       <ul className="social-icons">
         <li>
           <a
@@ -42,26 +44,6 @@ const Footer = () => {
           >
             <FaGooglePlay />
           </a>
-        </li>
-      </ul>
-      <ul className="qr-codes">
-        <li className="qr-code">
-          <img
-            src="https://res.cloudinary.com/nguyenle23/image/upload/v1703403332/qr_rmbg_jw4jix.png"
-            alt="Google Play Store QR Code"
-          />
-        </li>
-        <li className="qr-code">
-          <img
-            src="https://res.cloudinary.com/nguyenle23/image/upload/v1703403428/aiair_femkrw.png"
-            alt="Logo AIAir"
-          />
-        </li>
-        <li className="qr-code">
-          <img
-            src="https://res.cloudinary.com/nguyenle23/image/upload/v1703403534/AIoT-Logo-white_sgefbb.png"
-            alt="Logo AIoT Lab"
-          />
         </li>
       </ul>
     </div>

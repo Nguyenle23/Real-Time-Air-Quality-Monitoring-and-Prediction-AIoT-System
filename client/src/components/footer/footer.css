@@ -1,5 +1,5 @@
 .footer {
-  height: 70px;
+  height: 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -27,7 +27,7 @@
   font-size: 25px;
 }
 
-.qr-codes {
+/* .qr-codes {
   display: flex;
   list-style: none;
   padding: 0;
@@ -42,4 +42,4 @@
   width: 65px;
   height: auto;
   object-fit: cover;
-}
+} */

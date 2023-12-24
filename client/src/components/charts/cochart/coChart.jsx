@@ -139,7 +139,7 @@ const COChart = () => {
     },
     chart: {
       style: {
-        fontFamily: "Montserrat",
+        fontFamily: "Quicksand",
         fontSize: "16px",
         backgroundColor: "rgba(255, 255, 255, 0.0)",
       },

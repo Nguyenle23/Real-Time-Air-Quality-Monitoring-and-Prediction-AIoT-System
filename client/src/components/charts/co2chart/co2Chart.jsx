@@ -139,7 +139,7 @@ const CO2Chart = () => {
     },
     chart: {
       style: {
-        fontFamily: "Montserrat",
+        fontFamily: "Quicksand",
         fontSize: "16px",
         backgroundColor: "rgba(255, 255, 255, 0.0)",
       },
