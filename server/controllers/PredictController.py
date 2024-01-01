@@ -1,12 +1,12 @@
 from flask import request, jsonify
 import numpy as np
-from tensorflow.keras.models import load_model, model_from_json
 from joblib import load
 import os
 import pandas as pd
 from datetime import datetime
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from xgboost import XGBRegressor
+from prophet import Prophet
 
 RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
@@ -15,6 +15,66 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 server_dir = os.path.dirname(os.path.dirname(script_dir))
 
 class PredictController:
+  def predictTestTemp():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataTemp']
+
+        # push data to array
+        tempTime = []
+        for i in objectFormat['time']:
+          tempTime.append(i)
+
+        tempData = []
+        for i in objectFormat['value']:
+          tempData.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(tempData)
+        arrayTime = np.array(tempTime)
+        datetimeTemp = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset.reset_index(inplace=True)
+
+        model_prophet = Prophet()
+        model_prophet.fit(dataset)
+
+        # Make a future dataframe for 1 hours later (5 minutes each)
+        future = model_prophet.make_future_dataframe(periods=12, freq='5T')
+        forecast = model_prophet.predict(future)
+
+        # get last 12 rows
+        forecast = forecast.tail(12)
+
+        # get only ds and yhat
+        forecast = forecast[['ds', 'yhat']]
+        forecast = forecast.set_index('ds')
+        forecast.reset_index(inplace=True)
+
+        # convert to numpy array
+        arrayForecast = np.array(forecast['yhat'])
+
+        # round up to 2 decimal
+        arrayForecast = np.around(arrayForecast, decimals=2)
+
+        # combine array
+        # arrayForecast = np.concatenate((arrayData, arrayForecast), axis=0)
+        # print(arrayForecast)
+
+        # convert to list
+        listForecast = arrayForecast.tolist()
+
+        # convert to json
+        objectFormat['forecast'] = listForecast
+      
+      except Exception as e:
+        print(e)
+      
+    return jsonify(objectFormat)
   #-------------------predict temperature-------------------
   def predictLRTemp():
     if request.method == 'POST':
@@ -166,62 +226,7 @@ class PredictController:
         print(f"File not found: {model_path}")
     return jsonify(prediction[0].tolist())
   
-  def predictTestTemp():
-    if request.method == 'POST':
-      data = request.json
-      tempData = data['dataTemp']
-      tempTime = data['timeTemp']
-      print(tempData)
-      print(tempTime)
-
-      arrayData = np.array(tempData)
-      arrayTime = np.array(tempTime)
-      datetimeTemp = pd.to_datetime(arrayTime)
-
-      dataset = pd.DataFrame({'temp': arrayData, 'time': datetimeTemp})
-
-      dataset['temp_target'] = arrayData
-      dataset.reset_index(inplace=True)
-
-      X_temp = (dataset['time'] - dataset['time'].min()).dt.total_seconds().values.reshape(-1, 1)
-      y_temp = dataset['temp_target']
-      print(X_temp)
-      print(y_temp)
-
-      p_gb = {'n_estimators': 500, 'max_depth': 10, 'min_samples_split': 2,'learning_rate': 0.09, 'loss': 'squared_error', 'random_state': RANDOM_SEED}
-      test_model = GradientBoostingRegressor(**p_gb)
-
-      # p_xgb = {'n_estimators': 700, 'max_depth': 12, 'learning_rate': 0.05, 'random_state': 12}
-      # test_model = XGBRegressor(**p_xgb)
-
-      # p_rf = {'bootstrap': False,
-      # 'max_depth': 110,
-      # 'max_features': 'sqrt',
-      # 'min_samples_leaf': 2,
-      # 'min_samples_split': 2,
-      # 'n_estimators': 600,
-      # 'random_state': RANDOM_SEED}
-
-      # test_model = RandomForestRegressor(**p_rf)
-
-      test_model.fit(X_temp, y_temp)
-
-      #format 
-      input_datetime_str = str(datetimeTemp.min())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-      old_date = pd.to_datetime(formatted_datetime)
-
-      current_date = pd.Timestamp.now()
-      time_differences = (current_date - old_date).total_seconds()
-
-      prediction = test_model.predict([[time_differences]])
-      print(prediction)
-    return jsonify(prediction[0].tolist())
+  
   
   #----------------------predict humidity----------------------
   def predictLRHumi():
