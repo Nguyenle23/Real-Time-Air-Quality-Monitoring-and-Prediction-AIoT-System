@@ -1,0 +1,6 @@
+Flask==2.2.2
+Flask-Bcrypt==1.0.1
+Flask-Cors==3.0.10
+numpy==1.23.3
+pandas==1.5.2
+prophet==1.1.5
