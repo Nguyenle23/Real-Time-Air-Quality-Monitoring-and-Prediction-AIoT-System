@@ -130,7 +130,7 @@ const Navbar = () => {
           {
             reason: "AIAir is an air quality monitoring system that uses AIoT technology to monitor the air quality in your home or office.",
             developers: "AIAir is developed by AIoTLabVN, a group of students from the University of Science, Vietnam National University Ho Chi Minh City.",
-            majors: "AIAir is bachelor's thesis of the following students: Le Nguyen Binh Nguyen with supervisor Dr. Le Duy Tan with supervisor.",
+            majors: "AIAir is bachelor's thesis of student: Le Nguyen Binh Nguyen with supervisor Dr. Le Duy Tan.",
             contact: "If you have any questions, please contact us at AIoTLabVN",
             logoAIAir: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403428/aiair_femkrw.png",
             logoAIoTLabVN: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403333/aiot_logo_rmbg_uyord7.png",

@@ -1,6 +1,13 @@
 import { fetchDataTempHCM } from "../data/dataTemp";
-import { predictTempWithGB } from "../apis/callModelAPI";
+import { predictTempWithGB,  } from "../apis/callModelAPI";
 import { convertToBangkokTime } from "./utilDay";
+import { predictTempWithProphet } from "../apis/callModelAPI";
+
+export const predictProphetFunc = async (data) => {
+  return predictTempWithProphet(data).then((result) => {
+    return result.data.forecast;
+  });
+}
 
 export const predictGBFunction = async () => {
   return fetchDataTempHCM().then(async (result) => {

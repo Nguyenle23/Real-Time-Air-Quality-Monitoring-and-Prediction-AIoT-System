@@ -9,10 +9,13 @@ export const predictTempWithLR = async (data) => {
 };
 
 export const predictTempWithGB = async (data) => {
-  const response = await axios.post("https://air-quality-app-04a39fccf317.herokuapp.com//predict/gb/temp", {
-    dataTemp: data,
-  });
-  console.log(response)
+  const response = await axios.post(
+    "https://air-quality-app-04a39fccf317.herokuapp.com//predict/gb/temp",
+    {
+      dataTemp: data,
+    }
+  );
+  console.log(response);
   return response;
 };
 
@@ -37,10 +40,9 @@ export const predictTempWithKNN = async (data) => {
   return response;
 };
 
-export const predictTempTest = async (data, time) => {
+export const predictTempWithProphet = async (data) => {
   const response = await axios.post("http://localhost:5000/predict/test/temp", {
     dataTemp: data,
-    timeTemp: time,
   });
   return response;
 };

@@ -1,7 +1,11 @@
+// import { useContext } from "react";
+// import { ModelResultContext } from "../contexts/ModelResultContext";
+
 import { fetchDataTempHCM } from "../data/dataTemp";
-import { predictGBFunction } from "./modelForcasting";
+import { predictGBFunction, predictProphetFunc } from "./modelForcasting";
 
 export const options = [
+  { value: "Prophet", label: "Prophet" },
   { value: "SVR", label: "SVR" },
   { value: "SARIMA", label: "SARIMA" },
   { value: "RF", label: "RF" },
@@ -9,11 +13,21 @@ export const options = [
   { value: "XGB", label: "XGB" },
   { value: "LR", label: "LR" },
   { value: "KNN", label: "KNN" },
-  { value: "TEST", label: "TEST" },
 ];
 
-export const selectOption = (option) => {
+export const selectOption = (option, data) => {
+  // const { setSelectedModelResult } = useContext(ModelResultContext);
+
   switch (option.value) {
+    case "Prophet":
+      // predictProphetFunc(data);
+      const result = predictProphetFunc(data);
+      console.log(result)
+
+      // Update the selected model result in context
+      setSelectedModelResult(result);
+
+      break;
     case "SVR":
       alert("SVR is not available now");
       break;
@@ -26,8 +40,8 @@ export const selectOption = (option) => {
     case "GB":
       console.log("gb");
       predictGBFunction().then((err, result) => {
-        console.log(result)
-      })
+        console.log(result);
+      });
       break;
     case "XGB":
       predictXGBFunction();
@@ -111,7 +125,6 @@ export const predictLRFunction = async () => {
     });
   });
 };
-
 
 export const predictRFFunction = async () => {
   fetchDataTempHCM().then(async (result) => {

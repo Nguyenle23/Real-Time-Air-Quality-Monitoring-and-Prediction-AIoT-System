@@ -5,8 +5,8 @@ import Map from "./components/map/Map";
 import HeaderHCM from "./components/header/HeaderHCM";
 import HeaderTD from "./components/header/HeaderTD";
 import "./App.css";
-import qrGooglePlay from "../src/assets/qr_aiair_google_play.png";
 import Footer from "./components/footer/footer";
+// import { ModelResultProvider } from "./contexts/ModelResultContext";
 
 function App() {
   const [activeHeader, setActiveHeader] = useState("HCM");
@@ -21,19 +21,19 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      <div className="container-map">
-        <Map />
-      </div>
-      {activeHeader === "HCM" ? <HeaderHCM /> : <HeaderTD />}
-      <div className="slider-controls">
-        <button onClick={handlePrevious}>Previous</button>
-        <button onClick={handleNext}>Next</button>
-      </div>
-      <div className="container-chart">
-        <Chart />
-      </div>
-      <Footer />
+        <Navbar />
+        <div className="container-map">
+          <Map />
+        </div>
+        {activeHeader === "HCM" ? <HeaderHCM /> : <HeaderTD />}
+        <div className="slider-controls">
+          <button onClick={handlePrevious}>Previous</button>
+          <button onClick={handleNext}>Next</button>
+        </div>
+        <div className="container-chart">
+          <Chart />
+        </div>
+        <Footer />
     </>
   );
 }

@@ -4,7 +4,7 @@ export const formatDate = (date) => {
   let day = date.getDate();
   let month = date.getMonth() + 1;
   let year = date.getFullYear();
-  
+
   //get the date of the week
   let dayOfWeek = date.getDay();
   let dayOfWeekName = "";
@@ -79,3 +79,15 @@ export const formatInputEndDate = `${currentDate.getUTCFullYear()}-${String(
   2,
   "0"
 )}%2023:59:00`;
+
+export const formattedTimeToModel = (dateInput) => {
+  return `${dateInput.getFullYear()}-${(dateInput.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${dateInput
+    .getDate()
+    .toString()
+    .padStart(
+      2,
+      "0"
+    )} ${dateInput.getHours()}:${dateInput.getMinutes()}:${dateInput.getSeconds()}`;
+};

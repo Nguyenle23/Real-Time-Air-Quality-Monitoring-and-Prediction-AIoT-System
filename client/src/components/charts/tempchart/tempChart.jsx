@@ -1,19 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "./tempChart.css";
-
-import Highcharts from "highcharts";
+import ReactLoading from "react-loading";
+import Highcharts, { chart } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
-import { formatDate, convertToBangkokTime } from "../../../utils/utilDay";
-import { options } from "../../../utils/utilOptionModel";
+import {
+  formatDate,
+  convertToBangkokTime,
+  formattedTimeToModel,
+} from "../../../utils/utilDay";
+import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
 import { predictGBFunction } from "../../../utils/modelForcasting";
+import { predictTempWithProphet } from "../../../apis/callModelAPI";
+import { getNewestDataHCM } from "../../../apis/callAPI";
+// import { ModelResultContext } from "../../../contexts/ModelResultContext";
 
 const TempChart = () => {
-  const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
+  const [loading, setLoading] = useState(false);
+  const [chartData, setChartData] = useState({
+    seriesData: [],
+    timeData: [],
+    obj: [],
+    timeDataPredict: [],
+  });
   const [chartDataThuDuc, setChartDataThuDuc] = useState({
     seriesData: [],
     timeData: [],
@@ -32,7 +45,7 @@ const TempChart = () => {
       enabled: false,
     },
     title: {
-      text: `Timeseries data of Temperature on ${formatDate(currentDate)}`,
+      text: `Historical data of Temperature on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -120,7 +133,7 @@ const TempChart = () => {
       enabled: false,
     },
     title: {
-      text: `Predicted data of Temperature for next hour on ${formatDate(
+      text: `Forecasted data of Temperature for next hour with 5-intervals on ${formatDate(
         currentDate
       )}`,
     },
@@ -140,12 +153,12 @@ const TempChart = () => {
     },
     xAxis: {
       type: "datetime",
-      categories: predictData.timeData,
+      categories: chartData.timeDataPredict,
       title: {
         text: "Hour (UTC+7)",
       },
       labels: {
-        step: 12,
+        step: 2,
       },
     },
     yAxis: {
@@ -175,6 +188,11 @@ const TempChart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },
@@ -203,8 +221,30 @@ const TempChart = () => {
     setCheckPredict(false);
   };
 
-  const selectOption = (option) => {
+  let objFormat = {
+    time: [],
+    value: [],
+  };
+
+  const selectOption = async (option) => {
     switch (option.value) {
+      case "Prophet":
+        setLoading(true);
+        try {
+          await predictTempWithProphet(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+
+        break;
       case "SVR":
         alert("SVR is not available now");
         break;
@@ -226,16 +266,13 @@ const TempChart = () => {
         });
         break;
       case "XGB":
-        predictXGBFunction();
+        // predictXGBFunction();
         break;
       case "LR":
-        predictLRFunction();
+        // predictLRFunction();
         break;
       case "KNN":
-        predictKNNFunction();
-        break;
-      case "TEST":
-        predictTESTFunction();
+        // predictKNNFunction();
         break;
       default:
         break;
@@ -243,14 +280,40 @@ const TempChart = () => {
   };
 
   useEffect(() => {
-    fetchDataTempHCM().then((result) => {
+    fetchDataTempHCM().then(async (result) => {
       const data = result.data.feeds.map((item) => parseFloat(item.field1));
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
         const bangkokTime = convertToBangkokTime(date);
         return `${bangkokTime.hour}:${bangkokTime.minute} ${bangkokTime.amPm}`;
       });
-      setChartData({ seriesData: data, timeData: time });
+
+      const timeDataPredictArr = [];
+      await getNewestDataHCM().then((result) => {
+        const date = new Date(result.feeds[0].created_at);
+        for (let i = 0; i < 12; i++) {
+          // Repeat 12 times to increment by 1 hour (12 * 5 minutes = 1 hour)
+          date.setMinutes(date.getMinutes() + 5); // Add 5 minutes to the current date
+          const bangkokTime = convertToBangkokTime(date);
+          const timeDataPredict = `${bangkokTime.hour}:${bangkokTime.minute} ${bangkokTime.amPm}`;
+          timeDataPredictArr.push(timeDataPredict);
+        }
+      });
+
+      // send to model
+      result.data.feeds.forEach((entry) => {
+        const date = new Date(entry.created_at);
+        const formattedTime = formattedTimeToModel(date);
+        objFormat.time.push(formattedTime);
+        objFormat.value.push(entry.field1);
+      });
+
+      setChartData({
+        seriesData: data,
+        timeData: time,
+        obj: objFormat,
+        timeDataPredict: timeDataPredictArr,
+      });
     });
 
     fetchDataTempThuDuc().then((result) => {
@@ -277,7 +340,9 @@ const TempChart = () => {
               }
               onClick={() => {
                 setActive("realtime");
+                setLoading(true); 
                 realtimeFunction();
+                setLoading(false);
               }}
             >
               Now
@@ -285,15 +350,33 @@ const TempChart = () => {
             <button>
               <Dropdown
                 options={options}
-                onChange={selectOption}
+                onChange={(selectedOption) =>
+                  selectOption(selectedOption, chartData.obj)
+                }
                 placeholder="Select algorithm"
               />
             </button>
           </div>
-          {checkPredict == false ? (
-            <HighchartsReact highcharts={Highcharts} options={realChart} />
+          {loading ? (
+            <div className="loading">
+              <ReactLoading
+                type={"spin"}
+                color={"#000"}
+                height={100}
+                width={100}
+              />
+            </div>
           ) : (
-            <HighchartsReact highcharts={Highcharts} options={predictChart} />
+            <>
+              {checkPredict === false ? (
+                <HighchartsReact highcharts={Highcharts} options={realChart} />
+              ) : (
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={predictChart}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
