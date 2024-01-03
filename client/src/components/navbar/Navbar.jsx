@@ -238,7 +238,7 @@ const Navbar = () => {
                         <span>Link paper: Update soon</span>
                       ) : (
                         <>
-                          Link paper: 
+                          Link paper:  
                           <a href={item.link} target="_blank" rel="noreferrer">
                             {item.link}
                           </a>
