@@ -4,5 +4,6 @@ from controllers.PredictController import PredictController
 
 Predict = Blueprint('Predict', __name__)
 
-Predict.route('/test/temp', methods = ['POST'])(PredictController.predictTestTemp)
+Predict.route('/prophet/temp', methods = ['POST'])(PredictController.predictTempProphet)
+Predict.route('/lstm/temp', methods = ['POST'])(PredictController.predictTempLSTM)
 
