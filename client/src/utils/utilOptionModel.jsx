@@ -6,6 +6,7 @@ import { predictGBFunction, predictProphetFunc } from "./modelForcasting";
 
 export const options = [
   { value: "Prophet", label: "Prophet" },
+  { value: "LSTM", label: "LSTM" },
   { value: "SVR", label: "SVR" },
   { value: "SARIMA", label: "SARIMA" },
   { value: "RF", label: "RF" },
@@ -26,6 +27,13 @@ export const selectOption = (option, data) => {
 
       // Update the selected model result in context
       setSelectedModelResult(result);
+
+      break;
+
+    case "LSTM":
+      const resultLSTM = predictProphetFunc(data);
+      console.log(resultLSTM)
+      setSelectedModelResult(resultLSTM);
 
       break;
     case "SVR":

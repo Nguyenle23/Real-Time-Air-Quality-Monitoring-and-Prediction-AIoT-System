@@ -1,8 +1,8 @@
-from flask import Blueprint
+# from flask import Blueprint
 
-from controllers.QAController import QAController
+# from controllers.QAController import QAController
 
-QARouter = Blueprint('QARouter', __name__)
+# QARouter = Blueprint('QARouter', __name__)
 
-QARouter.route('/quynhanh', methods = ['GET'])(QAController.getSampleData)
+# QARouter.route('/quynhanh', methods = ['GET'])(QAController.getSampleData)
 

@@ -41,6 +41,13 @@ export const getDataOfTempHCM = async (start, end) => {
   return response;
 };
 
+export const get100DataOfTempHCM = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=${timezone}&results=100`
+  );
+  return response;
+};
+
 export const getDataOfTempThuDuc = async (start, end) => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2239030/fields/1.json?timezone=${timezone}&results=288&start=${start}&end=${end}`

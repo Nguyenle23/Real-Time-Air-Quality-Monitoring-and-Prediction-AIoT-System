@@ -15,8 +15,11 @@ import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
 import { predictGBFunction } from "../../../utils/modelForcasting";
-import { predictTempWithProphet } from "../../../apis/callModelAPI";
-import { getNewestDataHCM } from "../../../apis/callAPI";
+import {
+  predictTempWithLSTM,
+  predictTempWithProphet,
+} from "../../../apis/callModelAPI";
+import { getNewestDataHCM, get100DataOfTempHCM } from "../../../apis/callAPI";
 // import { ModelResultContext } from "../../../contexts/ModelResultContext";
 
 const TempChart = () => {
@@ -31,6 +34,10 @@ const TempChart = () => {
     seriesData: [],
     timeData: [],
   });
+  const [dataTemp, setDataTemp] = useState({
+    value: [],
+    time: [],
+  }); // data for model
 
   const [predictData, setPredictData] = useState({
     seriesData: [],
@@ -245,6 +252,23 @@ const TempChart = () => {
         }
 
         break;
+      case "LSTM":
+        setLoading(true);
+        try {
+          await predictTempWithLSTM(dataTemp).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+
+        break;
       case "SVR":
         alert("SVR is not available now");
         break;
@@ -329,6 +353,27 @@ const TempChart = () => {
     setInterval(fetchDataTempHCM, 5 * 60 * 1000);
   }, []);
 
+  useEffect(() => {
+    get100DataOfTempHCM().then((result) => {
+      let objFormat = {
+        time: [],
+        value: [],
+      };
+
+      result.data.feeds.forEach((entry) => {
+        const date = new Date(entry.created_at);
+        const formattedTime = formattedTimeToModel(date);
+        objFormat.time.push(formattedTime);
+        objFormat.value.push(entry.field1);
+      });
+
+      setDataTemp({
+        value: objFormat.value,
+        time: objFormat.time,
+      });
+    });
+  }, []);
+
   return (
     <>
       <div className="line-chart-container">
@@ -340,7 +385,7 @@ const TempChart = () => {
               }
               onClick={() => {
                 setActive("realtime");
-                setLoading(true); 
+                setLoading(true);
                 realtimeFunction();
                 setLoading(false);
               }}

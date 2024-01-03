@@ -41,7 +41,15 @@ export const predictTempWithKNN = async (data) => {
 };
 
 export const predictTempWithProphet = async (data) => {
-  const response = await axios.post("https://aiair-server.onrender.com/predict/test/temp", {
+  // const response = await axios.post("http://localhost:5000/predict/prophet/temp", {
+    const response = await axios.post("https://aiair-server.onrender.com/predict/test/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
+export const predictTempWithLSTM = async (data) => {
+  const response = await axios.post("http://localhost:5000/predict/lstm/temp", {
     dataTemp: data,
   });
   return response;
