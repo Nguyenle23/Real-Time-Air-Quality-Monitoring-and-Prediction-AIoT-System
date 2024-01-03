@@ -406,7 +406,7 @@ const TempChart = () => {
             <div className="loading">
               <ReactLoading
                 type={"spin"}
-                color={"#000"}
+                color={"#141cc4"}
                 height={100}
                 width={100}
               />
