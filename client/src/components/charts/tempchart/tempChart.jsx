@@ -14,7 +14,6 @@ import {
 import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
-import { predictGBFunction } from "../../../utils/modelForcasting";
 import {
   predictTempWithLSTM,
   predictTempWithProphet,
@@ -37,14 +36,13 @@ const TempChart = () => {
   const [dataTemp, setDataTemp] = useState({
     value: [],
     time: [],
-  }); // data for model
+  });
 
   const [predictData, setPredictData] = useState({
     seriesData: [],
     timeData: [],
   });
   const [checkPredict, setCheckPredict] = useState(false);
-
   const [active, setActive] = useState("realtime");
 
   const realChart = {
@@ -76,7 +74,7 @@ const TempChart = () => {
         text: "Hour (UTC+7)",
       },
       labels: {
-        step: 12,
+        step: 24,
       },
     },
     yAxis: {
@@ -276,27 +274,19 @@ const TempChart = () => {
         alert("SARIMA is not available now");
         break;
       case "RF":
-        predictRFFunction();
+        alert("Random Forest is not available now");
         break;
       case "GB":
-        console.log("gb");
-        predictGBFunction().then(async (result) => {
-          console.log(result);
-          setCheckPredict(true);
-          setPredictData({
-            timeData: result.timeData,
-            seriesData: result.seriesData,
-          });
-        });
+        alert("Gradient Boost is not available now");
         break;
       case "XGB":
-        // predictXGBFunction();
+        alert("XGradient Boost is not available now");
         break;
       case "LR":
-        // predictLRFunction();
+        alert("Linear Regression is not available now");
         break;
       case "KNN":
-        // predictKNNFunction();
+        alert("K-Nearest Neighborhood is not available now");
         break;
       default:
         break;

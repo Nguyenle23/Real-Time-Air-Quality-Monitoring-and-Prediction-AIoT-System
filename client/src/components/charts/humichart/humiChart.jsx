@@ -1,28 +1,48 @@
 import React, { useEffect, useState } from "react";
 import "./humiChart.css";
 
-import Highcharts from "highcharts";
+import ReactLoading from "react-loading";
+import Highcharts, { chart } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
-import { formatDate, convertToBangkokTime } from "../../../utils/utilDay";
+import {
+  formatDate,
+  convertToBangkokTime,
+  formattedTimeToModel,
+} from "../../../utils/utilDay";
 import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataHumiHCM, fetchDataHumiThuDuc } from "../../../data/dataHumi";
+import {
+  predictHumiWithLSTM,
+  predictHumiWithProphet,
+} from "../../../apis/callModelAPI";
+import { getNewestDataHCM, get100DataOfHumiHCM } from "../../../apis/callAPI";
 
 const HumiChart = () => {
-  const [chartData, setChartData] = useState({ seriesData: [], timeData: [] });
+  const [loading, setLoading] = useState(false);
+  const [chartData, setChartData] = useState({
+    seriesData: [],
+    timeData: [],
+    obj: [],
+    timeDataPredict: [],
+  });
   const [chartDataThuDuc, setChartDataThuDuc] = useState({
     seriesData: [],
     timeData: [],
   });
+  const [dataHumi, setDataHumi] = useState({
+    value: [],
+    time: [],
+  });
+
   const [predictData, setPredictData] = useState({
     seriesData: [],
     timeData: [],
   });
   const [checkPredict, setCheckPredict] = useState(false);
-
   const [active, setActive] = useState("realtime");
 
   const realChart = {
@@ -30,7 +50,7 @@ const HumiChart = () => {
       enabled: false,
     },
     title: {
-      text: `Timeseries data of Humidity on ${formatDate(currentDate)}`,
+      text: `Historical data of Humidity on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -54,7 +74,7 @@ const HumiChart = () => {
         text: "Hour (UTC+7)",
       },
       labels: {
-        step: 12,
+        step: 24,
       },
     },
     yAxis: {
@@ -118,7 +138,7 @@ const HumiChart = () => {
       enabled: false,
     },
     title: {
-      text: `Predicted data of Humidity for next hour on ${formatDate(
+      text: `Forecasted data of Humidity for next hour on ${formatDate(
         currentDate
       )}`,
     },
@@ -138,12 +158,12 @@ const HumiChart = () => {
     },
     xAxis: {
       type: "datetime",
-      categories: predictData.timeData,
+      categories: chartData.timeDataPredict,
       title: {
         text: "Hour (UTC+7)",
       },
       labels: {
-        step: 12,
+        step: 2,
       },
     },
     yAxis: {
@@ -196,15 +216,108 @@ const HumiChart = () => {
     setCheckPredict(false);
   };
 
+  let objFormat = {
+    time: [],
+    value: [],
+  };
+
+  const selectOption = async (option) => {
+    switch (option.value) {
+      case "Prophet":
+        setLoading(true);
+        try {
+          await predictHumiWithProphet(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+
+        break;
+      case "LSTM":
+        setLoading(true);
+        try {
+          await predictHumiWithLSTM(dataHumi).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+
+        break;
+      case "SVR":
+        alert("SVR is not available now");
+        break;
+      case "SARIMA":
+        alert("SARIMA is not available now");
+        break;
+      case "RF":
+        alert("Random Forest is not available now");
+        break;
+      case "GB":
+        alert("Gradient Boost is not available now");
+        break;
+      case "XGB":
+        alert("XGradient Boost is not available now");
+        break;
+      case "LR":
+        alert("Linear Regression is not available now");
+        break;
+      case "KNN":
+        alert("K-Nearest Neighborhood is not available now");
+        break;
+      default:
+        break;
+    }
+  };
+
   useEffect(() => {
-    fetchDataHumiHCM().then((result) => {
+    fetchDataHumiHCM().then(async (result) => {
       const data = result.data.feeds.map((item) => parseFloat(item.field2));
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
         const bangkokTime = convertToBangkokTime(date);
         return `${bangkokTime.hour}:${bangkokTime.minute} ${bangkokTime.amPm}`;
       });
-      setChartData({ seriesData: data, timeData: time });
+
+      const timeDataPredictArr = [];
+      await getNewestDataHCM().then((result) => {
+        const date = new Date(result.feeds[0].created_at);
+        for (let i = 0; i < 12; i++) {
+          // Repeat 12 times to increment by 1 hour (12 * 5 minutes = 1 hour)
+          date.setMinutes(date.getMinutes() + 5); // Add 5 minutes to the current date
+          const bangkokTime = convertToBangkokTime(date);
+          const timeDataPredict = `${bangkokTime.hour}:${bangkokTime.minute} ${bangkokTime.amPm}`;
+          timeDataPredictArr.push(timeDataPredict);
+        }
+      });
+
+      // send to model
+      result.data.feeds.forEach((entry) => {
+        const date = new Date(entry.created_at);
+        const formattedTime = formattedTimeToModel(date);
+        objFormat.time.push(formattedTime);
+        objFormat.value.push(entry.field2);
+      });
+
+      setChartData({
+        seriesData: data,
+        timeData: time,
+        obj: objFormat,
+        timeDataPredict: timeDataPredictArr,
+      });
     });
 
     fetchDataHumiThuDuc().then((result) => {
@@ -219,6 +332,27 @@ const HumiChart = () => {
     setInterval(fetchDataHumiHCM, 5 * 60 * 1000);
   }, []);
 
+  useEffect(() => {
+    get100DataOfHumiHCM().then((result) => {
+      let objFormat = {
+        time: [],
+        value: [],
+      };
+
+      result.data.feeds.forEach((entry) => {
+        const date = new Date(entry.created_at);
+        const formattedTime = formattedTimeToModel(date);
+        objFormat.time.push(formattedTime);
+        objFormat.value.push(entry.field2);
+      });
+
+      setDataHumi({
+        value: objFormat.value,
+        time: objFormat.time,
+      });
+    });
+  }, []);
+
   return (
     <>
       <div className="line-chart-container">
@@ -230,7 +364,9 @@ const HumiChart = () => {
               }
               onClick={() => {
                 setActive("realtime");
+                setLoading(true);
                 realtimeFunction();
+                setLoading(false);
               }}
             >
               Now
@@ -238,15 +374,33 @@ const HumiChart = () => {
             <button>
               <Dropdown
                 options={options}
-                onChange={selectOption}
+                onChange={(selectedOption) =>
+                  selectOption(selectedOption, chartData.obj)
+                }
                 placeholder="Select algorithm"
               />
             </button>
           </div>
-          {checkPredict == false ? (
-            <HighchartsReact highcharts={Highcharts} options={realChart} />
+          {loading ? (
+            <div className="loading">
+              <ReactLoading
+                type={"spin"}
+                color={"#141cc4"}
+                height={100}
+                width={100}
+              />
+            </div>
           ) : (
-            <HighchartsReact highcharts={Highcharts} options={predictChart} />
+            <>
+              {checkPredict === false ? (
+                <HighchartsReact highcharts={Highcharts} options={realChart} />
+              ) : (
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={predictChart}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

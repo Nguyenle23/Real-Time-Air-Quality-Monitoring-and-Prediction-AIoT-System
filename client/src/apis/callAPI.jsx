@@ -41,7 +41,7 @@ export const getDataOfTempHCM = async (start, end) => {
   return response;
 };
 
-export const get100DataOfTempHCM = async (start, end) => {
+export const get100DataOfTempHCM = async () => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=${timezone}&results=100`
   );
@@ -63,6 +63,13 @@ export const getDataOfHumiHCM = async (start, end) => {
   return response;
 };
 
+export const get100DataOfHumiHCM = async () => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=${timezone}&results=100`
+  );
+  return response;
+};
+
 export const getDataOfHumiThuDuc = async (start, end) => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2239030/fields/2.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
@@ -78,6 +85,13 @@ export const getDataOfCO2HCM = async (start, end) => {
   return response;
 };
 
+export const get100DataOfCO2HCM = async () => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/3.json?timezone=${timezone}&results=100`
+  );
+  return response;
+};
+
 export const getDataOfCO2TD = async (start, end) => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2239030/fields/3.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
@@ -85,11 +99,17 @@ export const getDataOfCO2TD = async (start, end) => {
   return response;
 };
 
-
 //------------CO----------------
 export const getDataOfCOHCM = async (start, end) => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2115707/fields/4.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
+  );
+  return response;
+};
+
+export const get100DataOfCOHCM = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/4.json?timezone=${timezone}&results=100`
   );
   return response;
 };
@@ -102,10 +122,24 @@ export const getDataOfUVHCM = async (start, end) => {
   return response;
 };
 
+export const get100DataOfUVHCM = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/5.json?timezone=${timezone}&results=100`
+  );
+  return response;
+};
+
 //------------PM2.5----------------
 export const getDataOfPM25HCM = async (start, end) => {
   const response = await axios.get(
     `https://api.thingspeak.com/channels/2115707/fields/6.json?timezone=${timezone}&results=288&start=${start}&end=${end}`
+  );
+  return response;
+};
+
+export const get100DataOfPM25HCM = async (start, end) => {
+  const response = await axios.get(
+    `https://api.thingspeak.com/channels/2115707/fields/6.json?timezone=${timezone}&results=100`
   );
   return response;
 };
