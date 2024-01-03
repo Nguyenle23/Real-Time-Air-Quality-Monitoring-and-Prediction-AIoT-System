@@ -6,3 +6,4 @@ pandas
 prophet
 gunicorn
 scikit-learn
+keras
