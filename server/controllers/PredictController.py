@@ -11,6 +11,8 @@ from prophet import Prophet
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import load_model
 from keras.models import model_from_json
+import warnings
+warnings.filterwarnings('ignore')
 
 RANDOM_SEED = 42
 np.random.seed(RANDOM_SEED)
@@ -286,6 +288,7 @@ class PredictController:
       except Exception as e:
         print(e)
     return jsonify(objectFormat)
+  
   #-------------------LSTM-------------------
   def predictTempLSTM():
     if request.method == 'POST':
@@ -309,6 +312,9 @@ class PredictController:
         dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
         dataset = dataset.set_index('ds')
         dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        
         dataset.reset_index(inplace=True)
 
         # Scale the data to be between 0 and 1
@@ -328,8 +334,8 @@ class PredictController:
         input_data = padded_temp.reshape((1, 1, sequence_length))
         
         # Load model architecture from JSON file
-        temp_lstm_json = os.path.join(server_dir, 'server/datasets/models/lstm/temp-lstm.json')
-        temp_lstm_weight = os.path.join(server_dir, 'server/datasets/models/lstm/temp_lstm_weight.h5')
+        temp_lstm_json = os.path.join(server_dir, 'server/datasets/models/lstm/temp_pc_lstm_weight.json')
+        temp_lstm_weight = os.path.join(server_dir, 'server/datasets/models/lstm/temp_pc_lstm_weight.h5')
         with open(temp_lstm_json, 'r') as json_file:
             loaded_model_json = json_file.read()
         
@@ -387,6 +393,8 @@ class PredictController:
         dataset = pd.DataFrame({'ds': datetimeHumi, 'y': arrayData})
         dataset = dataset.set_index('ds')
         dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
         dataset.reset_index(inplace=True)
 
         scaler = MinMaxScaler()
