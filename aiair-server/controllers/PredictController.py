@@ -334,7 +334,7 @@ class PredictController:
         input_data = padded_temp.reshape((1, 1, sequence_length))
         
         # Load model architecture from JSON file
-        temp_lstm_json = os.path.join(server_dir, 'server/datasets/models/lstm/temp_pc_lstm_weight.json')
+        temp_lstm_json = os.path.join(server_dir, 'server/datasets/models/lstm/temp-lstm.json')
         temp_lstm_weight = os.path.join(server_dir, 'server/datasets/models/lstm/temp_pc_lstm_weight.h5')
         with open(temp_lstm_json, 'r') as json_file:
             loaded_model_json = json_file.read()
