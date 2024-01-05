@@ -193,6 +193,11 @@ const CO2Chart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },

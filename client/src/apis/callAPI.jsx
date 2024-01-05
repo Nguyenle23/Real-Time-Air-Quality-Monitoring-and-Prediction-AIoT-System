@@ -41,9 +41,10 @@ export const getDataOfTempHCM = async (start, end) => {
   return response;
 };
 
-export const get100DataOfTempHCM = async () => {
+export const get100DataOfTempHCM = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=${timezone}&results=100`
+    `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2FBangkok&results=288&start=${start}&end=${end}`
+    // `https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=${timezone}&results=100`
   );
   return response;
 };
@@ -63,9 +64,10 @@ export const getDataOfHumiHCM = async (start, end) => {
   return response;
 };
 
-export const get100DataOfHumiHCM = async () => {
+export const get100DataOfHumiHCM = async (start, end) => {
   const response = await axios.get(
-    `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=${timezone}&results=100`
+    // `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=${timezone}&results=100`
+    `https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2FBangkok&results=288&start=${start}&end=${end}`
   );
   return response;
 };

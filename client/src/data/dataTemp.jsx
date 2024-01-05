@@ -1,5 +1,5 @@
-import { getDataOfTempHCM, getDataOfTempThuDuc } from "../apis/callAPI";
-import { formatInputStartDate, formatInputEndDate } from "../utils/utilDay";
+import { get100DataOfTempHCM, getDataOfTempHCM, getDataOfTempThuDuc } from "../apis/callAPI";
+import { formatInputStartDate, formatInputEndDate, formatInputStartPrevDate, formatInputEndPrevDate } from "../utils/utilDay";
 
 export const fetchDataTempHCM = async () => {
   const result = await getDataOfTempHCM(
@@ -16,3 +16,11 @@ export const fetchDataTempThuDuc = async () => {
   );
   return result;
 };
+
+export const fetch100DataOfTempHCM = async () => {
+  const result = await get100DataOfTempHCM(
+    formatInputStartPrevDate,
+    formatInputEndPrevDate
+  );
+  return result;
+}

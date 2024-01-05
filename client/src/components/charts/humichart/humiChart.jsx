@@ -14,7 +14,7 @@ import {
 } from "../../../utils/utilDay";
 import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
-import { fetchDataHumiHCM, fetchDataHumiThuDuc } from "../../../data/dataHumi";
+import { fetch100DataOfHumiHCM, fetchDataHumiHCM, fetchDataHumiThuDuc } from "../../../data/dataHumi";
 import {
   predictHumiWithLSTM,
   predictHumiWithProphet,
@@ -193,6 +193,11 @@ const HumiChart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },
@@ -333,7 +338,7 @@ const HumiChart = () => {
   }, []);
 
   useEffect(() => {
-    get100DataOfHumiHCM().then((result) => {
+    fetch100DataOfHumiHCM().then((result) => {
       let objFormat = {
         time: [],
         value: [],

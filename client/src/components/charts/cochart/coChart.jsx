@@ -193,6 +193,11 @@ const COChart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },

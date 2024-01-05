@@ -86,7 +86,7 @@ const PM25Chart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO (ppm)",
+        text: "PM2.5 (µg/m3)",
       },
     },
     responsive: {
@@ -175,7 +175,7 @@ const PM25Chart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO (ppm)",
+        text: "PM2.5 (µg/m3)",
       },
     },
     responsive: {
@@ -193,6 +193,11 @@ const PM25Chart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },

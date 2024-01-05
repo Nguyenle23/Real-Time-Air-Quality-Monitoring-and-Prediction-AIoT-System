@@ -11,40 +11,266 @@ const Navbar = () => {
         title: "Measures",
         content: [
           {
-            range: "0-50",
-            qualityAssessment: "Good",
-            description:
-              "Air quality is considered satisfactory, and air pollution poses little or no risk.",
+            subtitle: "Air Quality Index(AQI) - US EPA Standard",
+            url: "https://www.airnow.gov/aqi/aqi-basics/",
+            measureRange: [
+              {
+                range: "0-50",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Good",
+                description:
+                  "Air quality is considered satisfactory, and air pollution poses little or no risk.",
+              },
+              {
+                range: "51-100",
+                colorBG: "#ffde33",
+                colorText: "#000",
+                qualityAssessment: "Moderate",
+                description:
+                  "Air quality is acceptable; however, there may be some health concerns for a few sensitive individuals.",
+              },
+              {
+                range: "101-150",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Unhealthy for Sensitive Groups",
+                description:
+                  "Members of sensitive groups may experience health effects. The general public is less likely to be affected.",
+              },
+              {
+                range: "151-200",
+                colorBG: "#cc0033",
+                colorText: "#000",
+                qualityAssessment: "Unhealthy",
+                description:
+                  "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.",
+              },
+              {
+                range: "201-300",
+                colorBG: "#660099",
+                colorText: "#fff",
+                qualityAssessment: "Very Unhealthy",
+                description:
+                  "Health alert: everyone may experience more serious health effects.",
+              },
+              {
+                range: "301-500",
+                colorBG: "#7e0023",
+                colorText: "#fff",
+                qualityAssessment: "Hazardous",
+                description:
+                  "Health warnings of emergency conditions. The entire population is more likely to be affected.",
+              },
+            ],
           },
           {
-            range: "51-100",
-            qualityAssessment: "Moderate",
-            description:
-              "Air quality is acceptable; however, there may be some health concerns for a few sensitive individuals.",
+            subtitle: "CO2 Value - Standards Guidelines",
+            url: "https://www.fsis.usda.gov/sites/default/files/media_file/2020-08/Carbon-Dioxide.pdf",
+            measureRange: [
+              {
+                range: "0 - 10,000 ppm",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Normal",
+                description:
+                  "Typically no effects, possible drowsiness with prolonged exposure.",
+              },
+              {
+                range: "10 - 15,000 ppm",
+                colorBG: "#ffde33",
+                colorText: "#000",
+                qualityAssessment: "Moderate",
+                description:
+                  "Mild respiratory stimulation for some people.",
+              },
+              {
+                range: "15 - 30,000 ppm",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Unhealthy",
+                description:
+                  "Moderate respiratory stimulation, increased heart rate and blood pressure, ACGIH TLV-Short Term.",
+              },
+              {
+                range: "30 - 40,000 ppm",
+                colorBG: "#cc0033",
+                colorText: "#000",
+                qualityAssessment: "Dangerous",
+                description:
+                  "Immediately Dangerous to Life or Health (IDLH).",
+              },
+              {
+                range: "40 - 50,000 ppm",
+                colorBG: "#660099",
+                colorText: "#fff",
+                qualityAssessment: "Very dangerous",
+                description:
+                  "Strong respiratory stimulation, dizziness, confusion, headache, shortness of breath.",
+              },
+              {
+                range: "50 - 80,000 ppm",
+                colorBG: "#7e0023",
+                colorText: "#fff",
+                qualityAssessment: "Hazardous",
+                description:
+                  "Dimmed sight, sweating, tremor, unconsciousness, and possible death.",
+              },
+            ],
           },
           {
-            range: "101-150",
-            qualityAssessment: "Unhealthy for Sensitive Groups",
-            description:
-              "Members of sensitive groups may experience health effects. The general public is less likely to be affected.",
+            subtitle: "CO Value - Standards Guidelines",
+            url: "https://www.fsis.usda.gov/sites/default/files/media_file/2020-08/Carbon-Monoxide.pdf",
+            measureRange: [
+              {
+                range: "0 - 30 ppm",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Normal",
+                description:
+                  "Typically no effects, possible drowsiness with prolonged exposure.",
+              },
+              {
+                range: "35 - 50 ppm",
+                colorBG: "#ffde33",
+                colorText: "#000",
+                qualityAssessment: "Moderate",
+                description:
+                  "May cause headaches, dizziness, nausea, and fatigue in healthy individuals after prolonged exposure",
+              },
+              {
+                range: "50 - 100 ppm",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Unhealthy",
+                description:
+                  "Can impair coordination and judgment, and cause vomiting and shortness of breath",
+              },
+              {
+                range: "100 - 200 ppm",
+                colorBG: "#660099",
+                colorText: "#000",
+                qualityAssessment: "Dangerous",
+                description:
+                  "Can cause loss of consciousness and death within hours.",
+              },
+              {
+                range: "> 200 ppm",
+                colorBG: "#7e0023",
+                colorText: "#fff",
+                qualityAssessment: "Hazardous",
+                description:
+                  "Can cause death within minutes.",
+              },
+            ],
           },
           {
-            range: "151-200",
-            qualityAssessment: "Unhealthy",
-            description:
-              "Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects.",
+            subtitle: "UV Index - Standards Guidelines",
+            url: "https://enviro.epa.gov/facts/uv/index.html",
+            measureRange: [
+              {
+                range: "0 - 1",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Normal",
+                description:
+                  "Typically no effects, possible drowsiness with prolonged exposure.",
+              },
+              {
+                range: "1 - 2",
+                colorBG: "#ffde33",
+                colorText: "#000",
+                qualityAssessment: "Moderate",
+                description:
+                  "Minimal Risk",
+              },
+              {
+                range: "3 - 5",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Unhealthy",
+                description:
+                  "Moderate Risk",
+              },
+              {
+                range: "6 - 7",
+                colorBG: "#660099",
+                colorText: "#000",
+                qualityAssessment: "Dangerous",
+                description:
+                  "High Risk",
+              },
+              {
+                range: "8 - 10",
+                colorBG: "#cc0033",
+                colorText: "#000",
+                qualityAssessment: "Dangerous",
+                description:
+                  "Very High Risk",
+              },
+              {
+                range: " > 11",
+                colorBG: "#7e0023",
+                colorText: "#fff",
+                qualityAssessment: "Very dangerous",
+                description:
+                  "Extreme Risk",
+              },
+            ],
           },
           {
-            range: "201-300",
-            qualityAssessment: "Very Unhealthy",
-            description:
-              "Health alert: everyone may experience more serious health effects.",
-          },
-          {
-            range: "301-500",
-            qualityAssessment: "Hazardous",
-            description:
-              "Health warnings of emergency conditions. The entire population is more likely to be affected.",
+            subtitle: "Particular Matter 2.5 (PM2.5) - Standards Guidelines",
+            url: "https://ecmwf-projects.github.io/copernicus-training-cams/proc-aq-index.html",
+            measureRange: [
+              {
+                range: "0 - 10",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Very good",
+                description:
+                  "Typically no effects, possible drowsiness with prolonged exposure.",
+              },
+              {
+                range: "10 - 20",
+                colorBG: "#ffde33",
+                colorText: "#000",
+                qualityAssessment: "Good",
+                description:
+                  "Normal",
+              },
+              {
+                range: "20 - 25",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Medium",
+                description:
+                  "Moderate Risk",
+              },
+              {
+                range: "25 - 50",
+                colorBG: "#660099",
+                colorText: "#000",
+                qualityAssessment: "Poor",
+                description:
+                  "High Risk",
+              },
+              {
+                range: "50 - 75",
+                colorBG: "#cc0033",
+                colorText: "#000",
+                qualityAssessment: "Dangerous",
+                description:
+                  "Very High Risk",
+              },
+              {
+                range: "75 - 800",
+                colorBG: "#7e0023",
+                colorText: "#fff",
+                qualityAssessment: "Extremely dangerous",
+                description:
+                  "Extreme Risk",
+              },
+            ],
           },
         ],
       },
@@ -106,7 +332,7 @@ const Navbar = () => {
           {
             question: "How do I install the AIAir Quality System?",
             answer:
-              "The AIAir Quality System is easy to install. All you have to do is searching it on Google Play Store with \"AIAir Quality App\" and download it.",
+              'The AIAir Quality System is easy to install. All you have to do is searching it on Google Play Store with "AIAir Quality App" and download it.',
           },
           {
             question: "How do I use the AIAir Quality System?",
@@ -128,13 +354,20 @@ const Navbar = () => {
         title: "About",
         content: [
           {
-            reason: "AIAir is an air quality monitoring system that uses AIoT technology to monitor the air quality in your home or office.",
-            developers: "AIAir is developed by AIoTLabVN, a group of students from the University of Science, Vietnam National University Ho Chi Minh City.",
-            majors: "AIAir is bachelor's thesis of student: Le Nguyen Binh Nguyen with supervisor Dr. Le Duy Tan.",
-            contact: "If you have any questions, please contact us at AIoTLabVN",
-            logoAIAir: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403428/aiair_femkrw.png",
-            logoAIoTLabVN: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403333/aiot_logo_rmbg_uyord7.png",
-            qrCode: "https://res.cloudinary.com/nguyenle23/image/upload/v1703403332/qr_rmbg_jw4jix.png",
+            reason:
+              "AIAir is an air quality monitoring system that uses AIoT technology to monitor the air quality in your home or office.",
+            developers:
+              "AIAir is developed by AIoTLabVN, a group of students from the University of Science, Vietnam National University Ho Chi Minh City.",
+            majors:
+              "AIAir is bachelor's thesis of student: Le Nguyen Binh Nguyen with supervisor Dr. Le Duy Tan.",
+            contact:
+              "If you have any questions, please contact us at AIoTLabVN",
+            logoAIAir:
+              "https://res.cloudinary.com/nguyenle23/image/upload/v1703403428/aiair_femkrw.png",
+            logoAIoTLabVN:
+              "https://res.cloudinary.com/nguyenle23/image/upload/v1703403333/aiot_logo_rmbg_uyord7.png",
+            qrCode:
+              "https://res.cloudinary.com/nguyenle23/image/upload/v1703403332/qr_rmbg_jw4jix.png",
           },
         ],
       },
@@ -201,25 +434,71 @@ const Navbar = () => {
             </div>
             <div className="modal-content">
               {modalContent.title === "Measures" && (
-                <table className="modal-content-table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Range</th>
-                      <th>Quality Assessment</th>
-                      <th>Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {modalContent.content.map((item, index) => (
-                      <tr key={index} className="modal-content-item-table">
-                        <td colSpan={2}>{item.range}</td>
-                        <td>{item.qualityAssessment}</td>
-                        <td>{item.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <>
+                  {modalContent.content.map((item, index) => (
+                    <div key={index} className="modal-content-item">
+                      <div className="modal-content-item__subtitle">
+                        <span>
+                          {index}. {item.subtitle}{" "}
+                        </span>
+                        | {""}
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="modal-content-item__link"
+                        >
+                          Reference
+                        </a>
+                      </div>
+                      <br />
+                      <table className="modal-content-table">
+                        <thead>
+                          <tr>
+                            <th>Range</th>
+                            <th>Quality Assessment</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {item.measureRange.map((item, index) => (
+                            <tr
+                              key={index}
+                              className="modal-content-item-table"
+                            >
+                              <td
+                                style={{
+                                  backgroundColor: item.colorBG,
+                                  color: item.colorText,
+                                }}
+                                className="modal-range"
+                              >
+                                {item.range}
+                              </td>
+                              <td
+                                style={{
+                                  backgroundColor: item.colorBG,
+                                  color: item.colorText,
+                                }}
+                              >
+                                {item.qualityAssessment}
+                              </td>
+                              <td
+                                style={{
+                                  backgroundColor: item.colorBG,
+                                  color: item.colorText,
+                                }}
+                              >
+                                {item.description}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <br />
+                    </div>
+                  ))}
+                </>
               )}
               {modalContent.title === "Publications" &&
                 modalContent.content.map((item, index) => (
@@ -238,7 +517,7 @@ const Navbar = () => {
                         <span>Link paper: Update soon</span>
                       ) : (
                         <>
-                          Link paper:  
+                          Link paper:
                           <a href={item.link} target="_blank" rel="noreferrer">
                             {item.link}
                           </a>
@@ -252,7 +531,9 @@ const Navbar = () => {
                 modalContent.content.map((item, index) => (
                   <div key={index} className="modal-content-item">
                     <div className="modal-content-item__question">
-                    <span>{index}. {item.question}</span>
+                      <span>
+                        {index}. {item.question}
+                      </span>
                     </div>
                     <div className="modal-answer">
                       <span>{item.answer}</span>
@@ -279,7 +560,15 @@ const Navbar = () => {
                     <div className="modal-content-item__logo">
                       <img src={item.qrCode} alt="qr_code" />
                       <img src={item.logoAIAir} alt="logo_aiair" />
-                      <img style={{height: '100px', width: '90px', objectFit: 'cover'}} src={item.logoAIoTLabVN} alt="logo_aiot_lab_vn" />
+                      <img
+                        style={{
+                          height: "100px",
+                          width: "90px",
+                          objectFit: "cover",
+                        }}
+                        src={item.logoAIoTLabVN}
+                        alt="logo_aiot_lab_vn"
+                      />
                     </div>
                     <br />
                   </div>

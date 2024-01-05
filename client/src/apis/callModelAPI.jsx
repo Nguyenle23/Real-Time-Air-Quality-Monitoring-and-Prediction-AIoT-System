@@ -1,5 +1,9 @@
 import axios from "axios";
 
+const localURL = "http://localhost:5000";
+
+const renderURL = "https://aiair-server.onrender.com";
+
 //------------Temperature----------------
 // export const predictTempWithLR = async (data) => {
 //   const response = await axios.post("http://localhost:5000/predict/lr/temp", {
@@ -41,16 +45,14 @@ import axios from "axios";
 // };
 
 export const predictTempWithProphet = async (data) => {
-  // const response = await axios.post("http://localhost:5000/predict/prophet/temp", {
-    const response = await axios.post("https://aiair-server.onrender.com/predict/prophet/temp", {
+  const response = await axios.post(renderURL + "/predict/prophet/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithLSTM = async (data) => {
-  // const response = await axios.post("http://localhost:5000/predict/lstm/temp", {
-  const response = await axios.post("https://aiair-server.onrender.com/predict/lstm/temp", {
+  const response = await axios.post(renderURL + "/predict/lstm/temp", {
     dataTemp: data,
   });
   return response;
@@ -58,14 +60,14 @@ export const predictTempWithLSTM = async (data) => {
 
 //------------Humidity----------------
 export const predictHumiWithProphet = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/prophet/humi", {
+  const response = await axios.post(renderURL + "/predict/prophet/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithLSTM = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/lstm/humi", {
+  const response = await axios.post(renderURL + "/predict/lstm/humi", {
     dataHumi: data,
   });
   return response;
@@ -108,14 +110,14 @@ export const predictHumiWithLSTM = async (data) => {
 
 //------------CO2----------------
 export const predictCO2WithProphet = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/prophet/co2", {
+  const response = await axios.post(renderURL + "/predict/prophet/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithLSTM = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/lstm/co2", {
+  const response = await axios.post(renderURL + "/predict/lstm/co2", {
     dataCO2: data,
   });
   return response;
@@ -158,14 +160,14 @@ export const predictCO2WithLSTM = async (data) => {
 
 //------------CO----------------
 export const predictCOWithProphet = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/prophet/co", {
+  const response = await axios.post(renderURL + "/predict/prophet/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithLSTM = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/lstm/co", {
+  const response = await axios.post(renderURL + "/predict/lstm/co", {
     dataCO: data,
   });
   return response;
@@ -208,14 +210,14 @@ export const predictCOWithLSTM = async (data) => {
 
 //------------UV----------------
 export const predictUVWithProphet = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/prophet/uv", {
+  const response = await axios.post(renderURL + "/predict/prophet/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithLSTM = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/lstm/uv", {
+  const response = await axios.post(renderURL + "/predict/lstm/uv", {
     dataUV: data,
   });
   return response;
@@ -258,14 +260,14 @@ export const predictUVWithLSTM = async (data) => {
 
 //------------PM2.5----------------
 export const predictPM25WithProphet = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/prophet/pm25", {
+  const response = await axios.post(renderURL + "/predict/prophet/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithLSTM = async (data) => {
-  const response = await axios.post("http://localhost:5000/predict/lstm/pm25", {
+  const response = await axios.post(renderURL + "/predict/lstm/pm25", {
     dataPM25: data,
   });
   return response;

@@ -1,4 +1,4 @@
-import { currentDate } from "../constants/constanst";
+import { currentDate, previousDate } from "../constants/constanst";
 
 export const formatDate = (date) => {
   let day = date.getDate();
@@ -91,3 +91,17 @@ export const formattedTimeToModel = (dateInput) => {
       "0"
     )} ${dateInput.getHours()}:${dateInput.getMinutes()}:${dateInput.getSeconds()}`;
 };
+
+export const formatInputStartPrevDate = `${previousDate
+  .getUTCFullYear()
+  .toString()}-${String(previousDate.getUTCMonth() + 1).padStart(
+  2,
+  "0"
+)}-${String(previousDate.getUTCDate() + 1).padStart(2, "0")}%2008:00:00`;
+
+export const formatInputEndPrevDate = `${previousDate
+  .getUTCFullYear()
+  .toString()}-${String(previousDate.getUTCMonth() + 1).padStart(
+  2,
+  "0"
+)}-${String(previousDate.getUTCDate() + 1).padStart(2, "0")}%2016:00:00`;

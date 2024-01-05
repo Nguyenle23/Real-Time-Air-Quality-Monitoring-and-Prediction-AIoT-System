@@ -86,7 +86,7 @@ const UVChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO (ppm)",
+        text: "UV index",
       },
     },
     responsive: {
@@ -175,7 +175,7 @@ const UVChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "CO (ppm)",
+        text: "UV index",
       },
     },
     responsive: {
@@ -193,6 +193,11 @@ const UVChart = () => {
       ],
     },
     plotOptions: {
+      line: {
+        dataLabels: {
+          enabled: true,
+        },
+      },
       marker: {
         radius: 2,
       },

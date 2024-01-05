@@ -13,7 +13,7 @@ import {
 } from "../../../utils/utilDay";
 import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
-import { fetchDataTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
+import { fetchDataTempHCM, fetch100DataOfTempHCM, fetchDataTempThuDuc } from "../../../data/dataTemp";
 import {
   predictTempWithLSTM,
   predictTempWithProphet,
@@ -344,7 +344,7 @@ const TempChart = () => {
   }, []);
 
   useEffect(() => {
-    get100DataOfTempHCM().then((result) => {
+    fetch100DataOfTempHCM().then((result) => {
       let objFormat = {
         time: [],
         value: [],
