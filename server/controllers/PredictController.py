@@ -1,16 +1,15 @@
 from flask import request, jsonify
 import numpy as np
-import tensorflow as tf
-# from joblib import load
+from sklearn.neighbors import KNeighborsRegressor
 import os
 import pandas as pd
-from datetime import datetime
-# from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
-# from xgboost import XGBRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from xgboost import XGBRegressor
 from prophet import Prophet
 from sklearn.preprocessing import MinMaxScaler
-from keras.models import load_model
+from sklearn.linear_model import LinearRegression 
 from keras.models import model_from_json
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -19,6 +18,11 @@ np.random.seed(RANDOM_SEED)
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 server_dir = os.path.dirname(os.path.dirname(script_dir))
+
+p_gb = {'n_estimators': 500, 'max_depth': 10, 'min_samples_split': 2,'learning_rate': 0.09, 'loss': 'squared_error', 'random_state': RANDOM_SEED}
+p_xgb = {'n_estimators': 700, 'max_depth': 12, 'learning_rate': 0.09, 'random_state': RANDOM_SEED}
+p_rf = {'n_estimators': 1000, 'max_depth': 10, 'random_state': RANDOM_SEED}
+p_knn = {'n_neighbors': 3}
 
 class PredictController:
   #-------------------Prophet-------------------
@@ -639,6 +643,7 @@ class PredictController:
           predictions = loaded_model.predict(input_data)
           predictions_inv = scaler.inverse_transform(predictions)[0]
           arrayForecast = np.array(predictions_inv)
+          arrayForecast = np.absolute(arrayForecast)
           arrayForecast = np.around(arrayForecast, decimals=4)
           listForecast = arrayForecast.tolist()
           objectFormat['forecast'] = listForecast
@@ -648,910 +653,1316 @@ class PredictController:
         print(e)
     return jsonify(objectFormat)
   
-  #-------------------predict temperature-------------------
+  #-------------------LR-------------------
   def predictLRTemp():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataTemp']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataTemp']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        tempData = []
+        for i in objectFormat['value']:
+          tempData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        tempTime = []
+        for i in objectFormat['time']:
+          tempTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(tempData)
+        arrayTime = np.array(tempTime)
+        datetimeTemp = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_temp.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
 
-  def predictGBTemp():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataTemp']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        # get the last timestamp in the dataset
+        last_timestamp = dataset.index[-1]
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        # Generate timestamps for the next hour with 5-minute intervals
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        # Reshape timestamps to be used as features for prediction
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
 
-      old_date = pd.to_datetime(formatted_datetime)
+        next_hour_features.set_index('date', inplace=True)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        next_hour_features['time'] = np.arange(len(next_hour_features))
 
-      time_differences = (current_date - old_date).total_seconds()
+        # Use the trained model to predict vehicle count for the next hour
+        predicted_counts = model_lr.predict(next_hour_features)
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_temp.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
 
-  def predictXGBTemp():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataTemp']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        arrayForecast = np.around(predictions, decimals=8)
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        # convert to list
+        listForecast = arrayForecast.tolist()
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        # convert to json
+        objectFormat['forecast'] = listForecast
 
-      old_date = pd.to_datetime(formatted_datetime)
+        # input_datetime_str = str(dataset['ds'].max())
+        # old_date = pd.to_datetime(input_datetime_str)
+        
+        # # #get current date
+        # current_date = pd.Timestamp.now()
+        # time_differences = (current_date - old_date).total_seconds()
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        # model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_temp.pkl')
+        # if os.path.exists(model_path):
+        #     loaded_model = load(model_path)
+            
+        #     # Predicting 12 values
+        #     predictions = []
+        #     for _ in range(12):
+        #         prediction = loaded_model.predict([[time_differences]])
+        #         predictions.append(prediction[0])
+        #         time_differences += 300  # Assuming hourly predictions
+            
+        #     arrayForecast = np.around(predictions, decimals=8)
 
-      time_differences = (current_date - old_date).total_seconds()
+        #     # convert to list
+        #     listForecast = arrayForecast.tolist()
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_temp.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        #     # convert to json
+        #     objectFormat['forecast'] = listForecast
+        # else:
+        #     print(f"File not found: {model_path}")
 
-  def predictRFTemp():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataTemp']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_temp.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictKNNTemp():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataTemp']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_temp.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-  
-  
-  
-  #----------------------predict humidity----------------------
   def predictLRHumi():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataHumi']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataHumi']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        humiData = []
+        for i in objectFormat['value']:
+          humiData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        humiTime = []
+        for i in objectFormat['time']:
+          humiTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(humiData)
+        arrayTime = np.array(humiTime)
+        datetimeHumi = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeHumi, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_humi.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_lr.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=8)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictLRCO2():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO2']
+
+        co2Data = []
+        for i in objectFormat['value']:
+          co2Data.append(i)
+
+        co2Time = []
+        for i in objectFormat['time']:
+          co2Time.append(i)
+
+        arrayData = np.array(co2Data)
+        arrayTime = np.array(co2Time)
+        datetimeCO2 = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO2, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_lr.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=8)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictLRCO():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO']
+
+        coData = []
+        for i in objectFormat['value']:
+          coData.append(i)
+
+        coTime = []
+        for i in objectFormat['time']:
+          coTime.append(i)
+
+        arrayData = np.array(coData)
+        arrayTime = np.array(coTime)
+        datetimeCO = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_lr.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=8)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictLRUV():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataUV']
+
+        uvData = []
+        for i in objectFormat['value']:
+          uvData.append(i)
+
+        uvTime = []
+        for i in objectFormat['time']:
+          uvTime.append(i)
+
+        arrayData = np.array(uvData)
+        arrayTime = np.array(uvTime)
+        datetimeUV = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeUV, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_lr.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=8)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictLRPM25():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataPM25']
+
+        pm25Data = []
+        for i in objectFormat['value']:
+          pm25Data.append(i)
+
+        pm25Time = []
+        for i in objectFormat['time']:
+          pm25Time.append(i)
+
+        arrayData = np.array(pm25Data)
+        arrayTime = np.array(pm25Time)
+        datetimePM25 = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimePM25, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_lr = LinearRegression()
+        model_lr.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_lr.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=8)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  #-------------------GB-------------------
+  def predictGBTemp():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataTemp']
+
+        tempData = []
+        for i in objectFormat['value']:
+          tempData.append(i)
+
+        tempTime = []
+        for i in objectFormat['time']:
+          tempTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(tempData)
+        arrayTime = np.array(tempTime)
+        datetimeTemp = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+
+        # model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_temp.pkl')
+        # if os.path.exists(model_path):
+        #     loaded_model = load(model_path)
+        #     print(loaded_model)
+            
+        #     # Predicting 12 values
+        #     predictions = []
+        #     for _ in range(12):
+        #         prediction = loaded_model.predict([[time_differences]])
+        #         predictions.append(prediction[0])
+        #         time_differences += 300  # Assuming hourly predictions
+            
+        #     # round up to 2 decimal
+        #     arrayForecast = np.around(predictions, decimals=8)
+
+        #     # convert to list
+        #     listForecast = arrayForecast.tolist()
+
+        #     # convert to json
+        #     objectFormat['forecast'] = listForecast
+        # else:
+        #     print(f"File not found: {model_path}")
+
+        # return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
   def predictGBHumi():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataHumi']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataHumi']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        humiData = []
+        for i in objectFormat['value']:
+          humiData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        humiTime = []
+        for i in objectFormat['time']:
+          humiTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(humiData)
+        arrayTime = np.array(humiTime)
+        datetimeHumi = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeHumi, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_humi.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
 
-  def predictXGBHumi():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataHumi']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_humi.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictRFHumi():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataHumi']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_humi.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictKNNHumi():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataHumi']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_humi.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-  
-  #------------------predict CO2------------------
-  def predictLRCO2():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO2']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_co2.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
   def predictGBCO2():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO2']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataCO2']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        co2Data = []
+        for i in objectFormat['value']:
+          co2Data.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        co2Time = []
+        for i in objectFormat['time']:
+          co2Time.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(co2Data)
+        arrayTime = np.array(co2Time)
+        datetimeCO2 = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeCO2, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_co2.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
 
-  def predictXGBCO2():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO2']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_co2.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictRFCO2():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO2']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_co2.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictKNNCO2():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO2']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_co2.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)  
   
-  #------------------predict CO------------------
-  def predictLRCO():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_co.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
   def predictGBCO():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataCO']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        coData = []
+        for i in objectFormat['value']:
+          coData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        coTime = []
+        for i in objectFormat['time']:
+          coTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(coData)
+        arrayTime = np.array(coTime)
+        datetimeCO = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeCO, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_co.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
 
-  def predictXGBCO():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_co.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictRFCO():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_co.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictKNNCO():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataCO']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_co.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e) 
   
-  #------------------predict UV------------------
-  def predictLRUV():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataUV']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_uv.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
   def predictGBUV():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataUV']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataUV']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        uvData = []
+        for i in objectFormat['value']:
+          uvData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        uvTime = []
+        for i in objectFormat['time']:
+          uvTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(uvData)
+        arrayTime = np.array(uvTime)
+        datetimeUV = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeUV, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_uv.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
 
-  def predictXGBUV():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataUV']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_uv.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictRFUV():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataUV']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_uv.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-
-  def predictKNNUV():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataUV']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_uv.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
-  
-  #------------------predict PM2.5------------------
-  def predictLRPM25():
-    if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataPM25']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
-
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
-
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-      old_date = pd.to_datetime(formatted_datetime)
-
-      # #get current date
-      current_date = pd.Timestamp.now()
-
-      time_differences = (current_date - old_date).total_seconds()
-
-      model_path = os.path.join(server_dir, 'server/datasets/models/linear_regression/model_lr_pm25.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
   def predictGBPM25():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataPM25']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataPM25']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        pm25Data = []
+        for i in objectFormat['value']:
+          pm25Data.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        pm25Time = []
+        for i in objectFormat['time']:
+          pm25Time.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        arrayData = np.array(pm25Data)
+        arrayTime = np.array(pm25Time)
+        datetimePM25 = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimePM25, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/gradient_boost/model_gb_pm25.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = GradientBoostingRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  #-------------------XGB-------------------
+  def predictXGBTemp():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataTemp']
+
+        tempData = []
+        for i in objectFormat['value']:
+          tempData.append(i)
+
+        tempTime = []
+        for i in objectFormat['time']:
+          tempTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(tempData)
+        arrayTime = np.array(tempTime)
+        datetimeTemp = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictXGBHumi():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataHumi']
+
+        humiData = []
+        for i in objectFormat['value']:
+          humiData.append(i)
+
+        humiTime = []
+        for i in objectFormat['time']:
+          humiTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(humiData)
+        arrayTime = np.array(humiTime)
+        datetimeHumi = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeHumi, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictXGBCO2():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO2']
+
+        co2Data = []
+        for i in objectFormat['value']:
+          co2Data.append(i)
+
+        co2Time = []
+        for i in objectFormat['time']:
+          co2Time.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(co2Data)
+        arrayTime = np.array(co2Time)
+        datetimeCO2 = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO2, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictXGBCO():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO']
+
+        coData = []
+        for i in objectFormat['value']:
+          coData.append(i)
+
+        coTime = []
+        for i in objectFormat['time']:
+          coTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(coData)
+        arrayTime = np.array(coTime)
+        datetimeCO = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
   def predictXGBPM25():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataPM25']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataUV']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        uvData = []
+        for i in objectFormat['value']:
+          uvData.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        uvTime = []
+        for i in objectFormat['time']:
+          uvTime.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(uvData)
+        arrayTime = np.array(uvTime)
+        datetimeUV = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimeUV, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/extreme_gradient_boost/model_xgb_pm25.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictXGBUV():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataPM25']
+
+        pm25Data = []
+        for i in objectFormat['value']:
+          pm25Data.append(i)
+
+        pm25Time = []
+        for i in objectFormat['time']:
+          pm25Time.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(pm25Data)
+        arrayTime = np.array(pm25Time)
+        datetimePM25 = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimePM25, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_gb = XGBRegressor(**p_gb)
+        model_gb.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_gb.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  #-------------------RF-------------------
+  def predictRFTemp():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataTemp']
+
+        tempData = []
+        for i in objectFormat['value']:
+          tempData.append(i)
+
+        tempTime = []
+        for i in objectFormat['time']:
+          tempTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(tempData)
+        arrayTime = np.array(tempTime)
+        datetimeTemp = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeTemp, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictRFHumi():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataHumi']
+
+        humiData = []
+        for i in objectFormat['value']:
+          humiData.append(i)
+
+        humiTime = []
+        for i in objectFormat['time']:
+          humiTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(humiData)
+        arrayTime = np.array(humiTime)
+        datetimeHumi = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeHumi, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictRFCO2():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO2']
+
+        co2Data = []
+        for i in objectFormat['value']:
+          co2Data.append(i)
+
+        co2Time = []
+        for i in objectFormat['time']:
+          co2Time.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(co2Data)
+        arrayTime = np.array(co2Time)
+        datetimeCO2 = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO2, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictRFCO():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataCO']
+
+        coData = []
+        for i in objectFormat['value']:
+          coData.append(i)
+
+        coTime = []
+        for i in objectFormat['time']:
+          coTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(coData)
+        arrayTime = np.array(coTime)
+        datetimeCO = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeCO, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  def predictRFUV():
+    if request.method == 'POST':
+      try:
+        data = request.json
+        objectFormat = data['dataUV']
+
+        uvData = []
+        for i in objectFormat['value']:
+          uvData.append(i)
+
+        uvTime = []
+        for i in objectFormat['time']:
+          uvTime.append(i)
+
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(uvData)
+        arrayTime = np.array(uvTime)
+        datetimeUV = pd.to_datetime(arrayTime)
+
+        dataset = pd.DataFrame({'ds': datetimeUV, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
+
+        X = dataset[['time']]
+        y = dataset['y']
+
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
 
   def predictRFPM25():
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataPM25']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataPM25']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        pm25Data = []
+        for i in objectFormat['value']:
+          pm25Data.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        pm25Time = []
+        for i in objectFormat['time']:
+          pm25Time.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(pm25Data)
+        arrayTime = np.array(pm25Time)
+        datetimePM25 = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimePM25, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      time_differences = (current_date - old_date).total_seconds()
+        X = dataset[['time']]
+        y = dataset['y']
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/random_forest/model_rf_pm25.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        model_rf = RandomForestRegressor(**p_rf)
+        model_rf.fit(X, y)
 
-  def predictKNNPM25():
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_rf.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.around(predictions, decimals=10)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
+
+  
     if request.method == 'POST':
-      data = request.json
-      tempDate = data['dataPM25']
-      originalArray = np.array(tempDate)
-      input_datetime_str = pd.to_datetime(originalArray)
-      input_datetime_str = str(input_datetime_str.max())
+      try:
+        data = request.json
+        objectFormat = data['dataPM25']
 
-      # Parse the input datetime string
-      input_datetime = datetime.strptime(input_datetime_str, "%Y-%m-%d %H:%M:%S%z")
+        pm25Data = []
+        for i in objectFormat['value']:
+          pm25Data.append(i)
 
-      # Format the datetime as desired
-      formatted_datetime = input_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        pm25Time = []
+        for i in objectFormat['time']:
+          pm25Time.append(i)
 
-      old_date = pd.to_datetime(formatted_datetime)
+        # convert to numpy array and pandas dataframe
+        arrayData = np.array(pm25Data)
+        arrayTime = np.array(pm25Time)
+        datetimePM25 = pd.to_datetime(arrayTime)
 
-      # #get current date
-      current_date = pd.Timestamp.now()
+        dataset = pd.DataFrame({'ds': datetimePM25, 'y': arrayData})
+        dataset = dataset.set_index('ds')
+        dataset = dataset.resample('5T').ffill()
 
-      time_differences = (current_date - old_date).total_seconds()
+        dataset = dataset.dropna()
+        dataset = dataset.iloc[1:]
+        dataset['time'] = np.arange(len(dataset))
 
-      model_path = os.path.join(server_dir, 'server/datasets/models/k_nearest_neighboor/model_knn_pm25.pkl')
-      if os.path.exists(model_path):
-        loaded_model = load(model_path)
-        prediction = loaded_model.predict([[time_differences]])
-        print(prediction[0])
-      else:
-        print(f"File not found: {model_path}")
-    return jsonify(prediction[0].tolist())
+        X = dataset[['time']]
+        y = dataset['y']
+        
+        model_knn = KNeighborsRegressor(**p_knn)
+        model_knn.fit(X, y)
+
+        last_timestamp = dataset.index[-1]
+        next_hour_timestamps = pd.date_range(last_timestamp, periods=12, freq='5T')
+
+        next_hour_features = pd.DataFrame({'date': next_hour_timestamps})
+        next_hour_features.set_index('date', inplace=True)
+
+        next_hour_features['time'] = np.arange(len(next_hour_features))
+
+        predicted_counts = model_knn.predict(next_hour_features)
+        predictions = []
+        for i, count in enumerate(predicted_counts):
+          predictions.append(count)
+
+        arrayForecast = np.array(predictions)
+        listForecast = arrayForecast.tolist()
+        objectFormat['forecast'] = listForecast
+        return jsonify(objectFormat)
+      except Exception as e:
+          print(e)
