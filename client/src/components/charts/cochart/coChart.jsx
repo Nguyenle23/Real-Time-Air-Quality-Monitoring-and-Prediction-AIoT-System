@@ -16,8 +16,12 @@ import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataCOHCM } from "../../../data/dataCo";
 import {
+  predictCOWithGB,
+  predictCOWithLR,
   predictCOWithLSTM,
   predictCOWithProphet,
+  predictCOWithRF,
+  predictCOWithXGB,
 } from "../../../apis/callModelAPI";
 import { getNewestDataHCM, get100DataOfCOHCM } from "../../../apis/callAPI";
 
@@ -262,27 +266,74 @@ const COChart = () => {
         }
 
         break;
-      case "SVR":
-        alert("SVR is not available now");
+      case "GB":
+        setLoading(true);
+        try {
+          await predictCOWithGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "XGB":
+        setLoading(true);
+        try {
+          await predictCOWithXGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "RF":
+        setLoading(true);
+        try {
+          await predictCOWithRF(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "LR":
+        setLoading(true);
+        try {
+          await predictCOWithLR(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
         break;
       case "SARIMA":
         alert("SARIMA is not available now");
         break;
-      case "RF":
-        alert("Random Forest is not available now");
-        break;
-      case "GB":
-        alert("Gradient Boost is not available now");
-        break;
-      case "XGB":
-        alert("XGradient Boost is not available now");
-        break;
-      case "LR":
-        alert("Linear Regression is not available now");
-        break;
-      case "KNN":
-        alert("K-Nearest Neighborhood is not available now");
-        break;
+
       default:
         break;
     }

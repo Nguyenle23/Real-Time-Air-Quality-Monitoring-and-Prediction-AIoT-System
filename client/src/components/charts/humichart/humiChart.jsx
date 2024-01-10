@@ -16,8 +16,12 @@ import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetch100DataOfHumiHCM, fetchDataHumiHCM, fetchDataHumiThuDuc } from "../../../data/dataHumi";
 import {
+  predictHumiWithGB,
+  predictHumiWithLR,
   predictHumiWithLSTM,
   predictHumiWithProphet,
+  predictHumiWithRF,
+  predictHumiWithXGB,
 } from "../../../apis/callModelAPI";
 import { getNewestDataHCM, get100DataOfHumiHCM } from "../../../apis/callAPI";
 
@@ -262,27 +266,74 @@ const HumiChart = () => {
         }
 
         break;
-      case "SVR":
-        alert("SVR is not available now");
+      case "GB":
+        setLoading(true);
+        try {
+          await predictHumiWithGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "XGB":
+        setLoading(true);
+        try {
+          await predictHumiWithXGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "RF":
+        setLoading(true);
+        try {
+          await predictHumiWithRF(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "LR":
+        setLoading(true);
+        try {
+          await predictHumiWithLR(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
         break;
       case "SARIMA":
         alert("SARIMA is not available now");
         break;
-      case "RF":
-        alert("Random Forest is not available now");
-        break;
-      case "GB":
-        alert("Gradient Boost is not available now");
-        break;
-      case "XGB":
-        alert("XGradient Boost is not available now");
-        break;
-      case "LR":
-        alert("Linear Regression is not available now");
-        break;
-      case "KNN":
-        alert("K-Nearest Neighborhood is not available now");
-        break;
+      
       default:
         break;
     }

@@ -7,13 +7,11 @@ import { fetchDataTempHCM } from "../data/dataTemp";
 export const options = [
   { value: "Prophet", label: "Prophet" },
   { value: "LSTM", label: "LSTM" },
-  { value: "SVR", label: "SVR" },
-  { value: "SARIMA", label: "SARIMA" },
-  { value: "RF", label: "RF" },
   { value: "GB", label: "GB" },
   { value: "XGB", label: "XGB" },
+  { value: "RF", label: "RF" },
   { value: "LR", label: "LR" },
-  { value: "KNN", label: "KNN" },
+  // { value: "SARIMA", label: "SARIMA" },
 ];
 
 export const selectOption = (option, data) => {

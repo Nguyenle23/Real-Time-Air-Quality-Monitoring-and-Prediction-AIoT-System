@@ -65,6 +65,97 @@ const Navbar = () => {
             ],
           },
           {
+            subtitle: "Temperature - Standards Guidelines",
+            url: "https://www.researchgate.net/publication/363472655_MONITORING_SOLUTIONS_FOR_SMART_AGRICULTURE/figures?lo=1",
+            measureRange: [
+              {
+                range: "0 - 15°C",
+                colorBG: "#660099",
+                colorText: "#000",
+                qualityAssessment: "Very cold",
+                description:
+                  "Typically no effects, possible drowsiness with prolonged exposure.",
+              },
+              {
+                range: "15 - 25°C",
+                colorBG: "#3e66de",
+                colorText: "#000",
+                qualityAssessment: "Cold",
+                description:
+                  "May cause headaches, dizziness, nausea, and fatigue in healthy individuals after prolonged exposure",
+              },
+              {
+                range: "25 - 35°C",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Normal",
+                description:
+                  "Can impair coordination and judgment, and cause vomiting and shortness of breath",
+              },
+              {
+                range: "35 - 45°C",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Warm",
+                description:
+                  "Can cause loss of consciousness and death within hours.",
+              },
+              {
+                range: "> 45°C",
+                colorBG: "#b5260d",
+                colorText: "#fff",
+                qualityAssessment: "Hot",
+                description: "Can cause death within minutes.",
+              },
+            ],
+          },
+          {
+            subtitle: "Humidity - Standards Guidelines",
+            url: "https://www.airthings.com/en/contaminants/what-is-humidity",
+            measureRange: [
+              {
+                range: "< 25%",
+                colorBG: "#660099",
+                colorText: "#000",
+                qualityAssessment: "Very dry",
+                description:
+                  "Try drying clothes indoors using a drying rack rather than a tumble dryer. Ensure that you have plenty of ventilation when doing so.",
+              },
+              {
+                range: "25 - 30%",
+                colorBG: "#3e66de",
+                colorText: "#000",
+                qualityAssessment: "Dry",
+                description:
+                  "Fair humidity levels, keep monitoring. If you have a humidifier, you can use it to increase the humidity in your home.",
+              },
+              {
+                range: "30 - 60%",
+                colorBG: "#10b981",
+                colorText: "#000",
+                qualityAssessment: "Normal",
+                description:
+                  "Can impair coordination and judgment, and cause vomiting and shortness of breath. Maintain your healthy levels.",
+              },
+              {
+                range: "60 - 70%",
+                colorBG: "#ff9933",
+                colorText: "#000",
+                qualityAssessment: "Humid",
+                description:
+                  "Can cause loss of consciousness and death within hours. Fair humidity levels, keep monitoring",
+              },
+              {
+                range: "> 70%",
+                colorBG: "#b5260d",
+                colorText: "#fff",
+                qualityAssessment: "Very humid",
+                description:
+                  "Can cause death within minutes. Running a dehumidifier. Open windows for an hour or two on dry days",
+              },
+            ],
+          },
+          {
             subtitle: "CO2 Value - Standards Guidelines",
             url: "https://www.fsis.usda.gov/sites/default/files/media_file/2020-08/Carbon-Dioxide.pdf",
             measureRange: [
@@ -81,8 +172,7 @@ const Navbar = () => {
                 colorBG: "#ffde33",
                 colorText: "#000",
                 qualityAssessment: "Moderate",
-                description:
-                  "Mild respiratory stimulation for some people.",
+                description: "Mild respiratory stimulation for some people.",
               },
               {
                 range: "15 - 30,000 ppm",
@@ -97,8 +187,7 @@ const Navbar = () => {
                 colorBG: "#cc0033",
                 colorText: "#000",
                 qualityAssessment: "Dangerous",
-                description:
-                  "Immediately Dangerous to Life or Health (IDLH).",
+                description: "Immediately Dangerous to Life or Health (IDLH).",
               },
               {
                 range: "40 - 50,000 ppm",
@@ -159,8 +248,7 @@ const Navbar = () => {
                 colorBG: "#7e0023",
                 colorText: "#fff",
                 qualityAssessment: "Hazardous",
-                description:
-                  "Can cause death within minutes.",
+                description: "Can cause death within minutes.",
               },
             ],
           },
@@ -181,40 +269,35 @@ const Navbar = () => {
                 colorBG: "#ffde33",
                 colorText: "#000",
                 qualityAssessment: "Moderate",
-                description:
-                  "Minimal Risk",
+                description: "Minimal Risk",
               },
               {
                 range: "3 - 5",
                 colorBG: "#ff9933",
                 colorText: "#000",
                 qualityAssessment: "Unhealthy",
-                description:
-                  "Moderate Risk",
+                description: "Moderate Risk",
               },
               {
                 range: "6 - 7",
                 colorBG: "#660099",
                 colorText: "#000",
                 qualityAssessment: "Dangerous",
-                description:
-                  "High Risk",
+                description: "High Risk",
               },
               {
                 range: "8 - 10",
                 colorBG: "#cc0033",
                 colorText: "#000",
                 qualityAssessment: "Dangerous",
-                description:
-                  "Very High Risk",
+                description: "Very High Risk",
               },
               {
                 range: " > 11",
                 colorBG: "#7e0023",
                 colorText: "#fff",
                 qualityAssessment: "Very dangerous",
-                description:
-                  "Extreme Risk",
+                description: "Extreme Risk",
               },
             ],
           },
@@ -235,40 +318,35 @@ const Navbar = () => {
                 colorBG: "#ffde33",
                 colorText: "#000",
                 qualityAssessment: "Good",
-                description:
-                  "Normal",
+                description: "Normal",
               },
               {
                 range: "20 - 25",
                 colorBG: "#ff9933",
                 colorText: "#000",
                 qualityAssessment: "Medium",
-                description:
-                  "Moderate Risk",
+                description: "Moderate Risk",
               },
               {
                 range: "25 - 50",
                 colorBG: "#660099",
                 colorText: "#000",
                 qualityAssessment: "Poor",
-                description:
-                  "High Risk",
+                description: "High Risk",
               },
               {
                 range: "50 - 75",
                 colorBG: "#cc0033",
                 colorText: "#000",
                 qualityAssessment: "Dangerous",
-                description:
-                  "Very High Risk",
+                description: "Very High Risk",
               },
               {
                 range: "75 - 800",
                 colorBG: "#7e0023",
                 colorText: "#fff",
                 qualityAssessment: "Extremely dangerous",
-                description:
-                  "Extreme Risk",
+                description: "Extreme Risk",
               },
             ],
           },
@@ -337,7 +415,7 @@ const Navbar = () => {
           {
             question: "How do I use the AIAir Quality System?",
             answer:
-              "The AIAir Quality System is easy to use. All you have to do is accessing the web application via https://www.aiair-aiotlabvn.tech/ and use it.",
+              "The AIAir Quality System is easy to use. All you have to do is accessing the web application via https://www.aiair-aiotlabvn.tech/ and use it. For mobile application, you can download it on Google Play Store via https://play.google.com/store/apps/details?id=com.aiotlabvn.iu_air_quality",
           },
           {
             question: "How do I contact customer support?",
@@ -517,7 +595,7 @@ const Navbar = () => {
                         <span>Link paper: Update soon</span>
                       ) : (
                         <>
-                          Link paper:
+                          Link paper: {""}
                           <a href={item.link} target="_blank" rel="noreferrer">
                             {item.link}
                           </a>

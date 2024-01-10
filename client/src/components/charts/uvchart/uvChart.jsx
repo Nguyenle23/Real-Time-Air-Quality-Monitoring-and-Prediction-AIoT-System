@@ -16,8 +16,12 @@ import { options, selectOption } from "../../../utils/utilOptionModel";
 import { currentDate } from "../../../constants/constanst";
 import { fetchDataUVHCM } from "../../../data/dataUv";
 import {
+  predictUVWithGB,
+  predictUVWithLR,
   predictUVWithLSTM,
   predictUVWithProphet,
+  predictUVWithRF,
+  predictUVWithXGB,
 } from "../../../apis/callModelAPI";
 import { getNewestDataHCM, get100DataOfUVHCM } from "../../../apis/callAPI";
 
@@ -50,7 +54,7 @@ const UVChart = () => {
       enabled: false,
     },
     title: {
-      text: `Historical data of UV index on ${formatDate(currentDate)}`,
+      text: `Historical data of UV Index on ${formatDate(currentDate)}`,
     },
     subtitle: {
       text: "Notice: The data is updated every 5 minutes and pinch to zoom in",
@@ -86,7 +90,7 @@ const UVChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "UV index",
+        text: "UV Index",
       },
     },
     responsive: {
@@ -138,7 +142,7 @@ const UVChart = () => {
       enabled: false,
     },
     title: {
-      text: `Forecasted data of UV index for next hour on ${formatDate(
+      text: `Forecasted data of UV Index for next hour on ${formatDate(
         currentDate
       )}`,
     },
@@ -175,7 +179,7 @@ const UVChart = () => {
       reversed: false,
       title: {
         x: -16,
-        text: "UV index",
+        text: "UV Index",
       },
     },
     responsive: {
@@ -262,28 +266,74 @@ const UVChart = () => {
         }
 
         break;
-      case "SVR":
-        alert("SVR is not available now");
+      case "GB":
+        setLoading(true);
+        try {
+          await predictUVWithGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "XGB":
+        setLoading(true);
+        try {
+          await predictUVWithXGB(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "LR":
+        setLoading(true);
+        try {
+          await predictUVWithLR(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+        break;
+      case "RF":
+        setLoading(true);
+        try {
+          await predictUVWithRF(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
         break;
       case "SARIMA":
         alert("SARIMA is not available now");
         break;
-      case "RF":
-        alert("Random Forest is not available now");
-        break;
-      case "GB":
-        alert("Gradient Boost is not available now");
-        break;
-      case "XGB":
-        alert("XGradient Boost is not available now");
-        break;
-      case "LR":
-        alert("Linear Regression is not available now");
-        break;
-      case "KNN":
-        alert("K-Nearest Neighborhood is not available now");
-        break;
-      default:
+        default:
         break;
     }
   };
