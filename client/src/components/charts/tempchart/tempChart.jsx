@@ -257,7 +257,7 @@ const TempChart = () => {
       case "LSTM":
         setLoading(true);
         try {
-          await predictTempWithLSTM(dataTemp).then((result) => {
+          await predictTempWithLSTM(chartData.obj).then((result) => {
             setCheckPredict(true);
             setPredictData({
               timeData: chartData.timeDataPredict,
