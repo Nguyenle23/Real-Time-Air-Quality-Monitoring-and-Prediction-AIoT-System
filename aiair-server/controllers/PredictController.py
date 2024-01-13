@@ -329,7 +329,7 @@ class PredictController:
         scaled_temp = scaler.fit_transform(dataset[['y']])
 
         # Ensure the sequence length matches the model's input (100 time steps)
-        sequence_length = 100
+        sequence_length = 12
 
         # Pad or truncate the sequence to match the model's input sequence length
         if len(scaled_temp) < sequence_length:
@@ -341,8 +341,8 @@ class PredictController:
         input_data = padded_temp.reshape((1, 1, sequence_length))
         
         # Load model architecture from JSON file
-        temp_lstm_json = os.path.join(server_dir, 'aiair-server/datasets/models/lstm/temp_pc_lstm_weight.json')
-        temp_lstm_weight = os.path.join(server_dir, 'aiair-server/datasets/models/lstm/temp_pc_lstm_weight.h5')
+        temp_lstm_json = os.path.join(server_dir, 'aiair-server/datasets/models/lstm/test-lstm.json')
+        temp_lstm_weight = os.path.join(server_dir, 'aiair-server/datasets/models/lstm/test_lstm_weight.h5')
         with open(temp_lstm_json, 'r') as json_file:
             loaded_model_json = json_file.read()
         
