@@ -5,6 +5,13 @@ const localURL = "http://localhost:5000";
 const renderURL = "https://aiair-server.onrender.com";
 
 //------------Temperature----------------
+export const predictTempWithProphetLSTM = async (data) => {
+  const response = await axios.post(localURL + "/predict/prophet-lstm/temp", {
+    dataTemp: data,
+  });
+  return response;
+};
+
 export const predictTempWithProphet = async (data) => {
   const response = await axios.post(renderURL + "/predict/prophet/temp", {
     dataTemp: data,
@@ -13,7 +20,7 @@ export const predictTempWithProphet = async (data) => {
 };
 
 export const predictTempWithLSTM = async (data) => {
-  const response = await axios.post(renderURL + "/predict/lstm/temp", {
+  const response = await axios.post(localURL + "/predict/lstm/temp", {
     dataTemp: data,
   });
   return response;

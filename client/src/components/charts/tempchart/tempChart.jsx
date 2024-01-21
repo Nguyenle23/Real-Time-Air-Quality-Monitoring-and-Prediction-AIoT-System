@@ -19,6 +19,7 @@ import {
   predictTempWithLR,
   predictTempWithLSTM,
   predictTempWithProphet,
+  predictTempWithProphetLSTM,
   predictTempWithRF,
   predictTempWithXGB,
 } from "../../../apis/callModelAPI";
@@ -237,6 +238,23 @@ const TempChart = () => {
 
   const selectOption = async (option) => {
     switch (option.value) {
+      case "Prophet-LSTM":
+        setLoading(true);
+        try {
+          await predictTempWithProphetLSTM(chartData.obj).then((result) => {
+            setCheckPredict(true);
+            setPredictData({
+              timeData: chartData.timeDataPredict,
+              seriesData: result.data.forecast,
+            });
+          });
+        } catch (error) {
+          console.error("Error occurred:", error);
+        } finally {
+          setLoading(false);
+        }
+
+        break;
       case "Prophet":
         setLoading(true);
         try {

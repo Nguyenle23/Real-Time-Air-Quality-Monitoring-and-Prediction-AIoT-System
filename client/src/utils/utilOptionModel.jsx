@@ -5,6 +5,7 @@ import { fetchDataTempHCM } from "../data/dataTemp";
 // import { predictGBFunction, predictProphetFunc } from "./modelForcasting";
 
 export const options = [
+  { value: "Prophet-LSTM", label: "Prophet-LSTM" },
   { value: "Prophet", label: "Prophet" },
   { value: "LSTM", label: "LSTM" },
   { value: "GB", label: "GB" },
