@@ -4,51 +4,53 @@ const localURL = "http://localhost:5000";
 
 const renderURL = "https://aiair-server.onrender.com";
 
+const digitalOceanURL = "http://157.245.59.252:3000/";
+
 //------------Temperature----------------
 export const predictTempWithProphetLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet-lstm/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet-lstm/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/temp", {
     dataTemp: data,
   });
   return response;
 };
 
 export const predictTempWithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/temp", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/temp", {
     dataTemp: data,
   });
   return response;
@@ -56,42 +58,42 @@ export const predictTempWithRF = async (data) => {
 
 //------------Humidity----------------
 export const predictHumiWithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/humi", {
     dataHumi: data,
   });
   return response;
 };
 
 export const predictHumiWithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/humi", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/humi", {
     dataHumi: data,
   });
   return response;
@@ -99,42 +101,42 @@ export const predictHumiWithRF = async (data) => {
 
 //------------CO2----------------
 export const predictCO2WithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/co2", {
     dataCO2: data,
   });
   return response;
 };
 
 export const predictCO2WithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/co2", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/co2", {
     dataCO2: data,
   });
   return response;
@@ -142,42 +144,42 @@ export const predictCO2WithRF = async (data) => {
 
 //------------CO----------------
 export const predictCOWithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/co", {
     dataCO: data,
   });
   return response;
 };
 
 export const predictCOWithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/co", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/co", {
     dataCO: data,
   });
   return response;
@@ -185,42 +187,42 @@ export const predictCOWithRF = async (data) => {
 
 //------------UV----------------
 export const predictUVWithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/uv", {
     dataUV: data,
   });
   return response;
 };
 
 export const predictUVWithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/uv", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/uv", {
     dataUV: data,
   });
   return response;
@@ -228,42 +230,42 @@ export const predictUVWithRF = async (data) => {
 
 //------------PM2.5----------------
 export const predictPM25WithProphet = async (data) => {
-  const response = await axios.post(localURL + "/predict/prophet/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/prophet/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithLSTM = async (data) => {
-  const response = await axios.post(localURL + "/predict/lstm/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/lstm/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithLR = async (data) => {
-  const response = await axios.post(localURL + "/predict/lr/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/lr/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/gb/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/gb/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithXGB = async (data) => {
-  const response = await axios.post(localURL + "/predict/xgb/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/xgb/pm25", {
     dataPM25: data,
   });
   return response;
 };
 
 export const predictPM25WithRF = async (data) => {
-  const response = await axios.post(localURL + "/predict/rf/pm25", {
+  const response = await axios.post(digitalOceanURL + "/predict/rf/pm25", {
     dataPM25: data,
   });
   return response;
