@@ -219,11 +219,11 @@ const TempChart = () => {
         name: "Ho Chi Minh City",
         data: predictData.seriesData,
       },
-      {
-        type: "line",
-        name: "Thu Duc City",
-        data: chartDataThuDuc.seriesData,
-      },
+      // {
+      //   type: "line",
+      //   name: "Thu Duc City",
+      //   data: chartDataThuDuc.seriesData,
+      // },
     ],
   };
 

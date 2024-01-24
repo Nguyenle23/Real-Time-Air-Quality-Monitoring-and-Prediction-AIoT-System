@@ -129,11 +129,11 @@ const UVChart = () => {
         name: "Ho Chi Minh City",
         data: chartData.seriesData,
       },
-      {
-        type: "line",
-        name: "Thu Duc City",
-        // data: chartDataThuDuc.seriesData,
-      },
+      // {
+      //   type: "line",
+      //   name: "Thu Duc City",
+      //   // data: chartDataThuDuc.seriesData,
+      // },
     ],
   };
 
