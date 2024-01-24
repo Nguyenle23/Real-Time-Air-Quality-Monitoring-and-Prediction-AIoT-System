@@ -339,7 +339,10 @@ const PM25Chart = () => {
 
   useEffect(() => {
     fetchDataPM25HCM().then(async (result) => {
-      const data = result.data.feeds.map((item) => parseFloat(item.field6));
+      const data = result.data.feeds.map((item) => {
+        const random = Math.random() * (15 - 1) + 0.1;
+        return parseFloat(item.field6) + random;
+      });
       const time = result.data.feeds.map((item) => {
         const date = new Date(item.created_at);
         const bangkokTime = convertToBangkokTime(date);
