@@ -18,6 +18,8 @@ Predict.route('/prophet/co', methods = ['POST'])(PredictController.predictCOProp
 Predict.route('/prophet/uv', methods = ['POST'])(PredictController.predictUVProphet)
 Predict.route('/prophet/pm25', methods = ['POST'])(PredictController.predictPM25Prophet)
 
+Predict.route('/prophet-lstm/temp', methods = ['POST'])(PredictController.predictTempProphetLSTM)
+
 Predict.route('/lstm/temp', methods = ['POST'])(PredictController.predictTempLSTM)
 Predict.route('/lstm/humi', methods = ['POST'])(PredictController.predictHumiLSTM)
 Predict.route('/lstm/co2', methods = ['POST'])(PredictController.predictCO2LSTM)
