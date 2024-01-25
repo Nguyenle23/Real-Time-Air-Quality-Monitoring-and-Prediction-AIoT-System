@@ -4,7 +4,7 @@ const localURL = "http://localhost:5000";
 
 const renderURL = "https://aiair-server.onrender.com";
 
-const digitalOceanURL = "https://www.aiair-server.tech/";
+const digitalOceanURL = "https://www.aiair-server.tech";
 
 //------------Temperature----------------
 export const predictTempWithProphetLSTM = async (data) => {
