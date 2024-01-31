@@ -375,7 +375,7 @@ const Navbar = () => {
               "An AIoT System for Real-Time Air Quality Monitoring and Forecasting",
             authors:
               "Binh Nguyen Le Nguyen, Nam Anh Dang Nguyen, Duc Dang Khoi Nguyen, Le Duy Tan",
-            link: "",
+            link: "https://drive.google.com/file/d/1hq2E2Cl8nB3ATfGPzpBq0Ep1bHHkBP6p/view?usp=sharing",
           },
         ],
       },
