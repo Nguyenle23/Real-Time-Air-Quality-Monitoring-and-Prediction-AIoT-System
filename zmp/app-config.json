@@ -1,22 +1,22 @@
 {
   "app": {
-    "title": "Quan trắc chất lượng không khí ",
+    "title": "AIAir Quality App",
     "headerTitle": "Quan trắc chất lượng không khí ",
     "headerColor": {
-      "light": "#2b6130",
-      "dark": "#2b6130"
+      "light": "#205cf1",
+      "dark": "#205cf1"
     },
     "textColor": "white",
     "statusBarColor": {
-      "light": "#2b6130",
-      "dark": "#2b6130"
+      "light": "#205cf1",
+      "dark": "#205cf1"
     },
     "leftButton": "back",
     "statusBar": "normal",
     "actionBarHidden": false,
     "hideAndroidBottomNavigationBar": true,
     "hideIOSSafeAreaBottom": true,
-    "textAlign": "left",
+    "textAlign": "center",
     "selfControlLoading": false
   },
   "debug": false,

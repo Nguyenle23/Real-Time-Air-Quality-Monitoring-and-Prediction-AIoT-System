@@ -8,6 +8,11 @@ import Form from "../pages/form";
 import User from "../pages/user";
 import Navbar from "./navbar/Navbar";
 import MapChart from "./map/MapChart";
+import InfoHighlight from "./highlight/InfoHighlight";
+import Footer from "./footer/Footer";
+import Chart from "./chart/Chart";
+
+import "./app.css";
 
 const MyApp = () => {
   return (
@@ -15,6 +20,9 @@ const MyApp = () => {
       <App>
         <Navbar />
         <MapChart />
+        <InfoHighlight />
+        <Chart />
+        <Footer />
         {/* <SnackbarProvider>
           <ZMPRouter>
             <AnimationRoutes>

@@ -1,6 +1,7 @@
 .navbar__container {
   background: #fff;
-  color: #2b6130;
+  width: 100%;
+  color: #205cf1;
   padding: 12px 0;
   position: absolute;
   top: 0;
@@ -17,7 +18,7 @@
 }
 
 .navbar__logo__container {
-  width: 30%;
+  width: 20%;
   display: flex;
   justify-content: center;
 }

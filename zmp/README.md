@@ -8,13 +8,13 @@ ZMP app created with following options:
 {
   "cwd": "C:\\Users\\PC\\Documents\\GitHub\\zalo-mini-app\\Air-quality-app-from-AIoT-Lab-VN",
   "newProject": true,
-  "name": "Quan trắc chất lượng không khí ",
+  "name": "AIAir Quality App",
   "package": "zmp-ui",
   "framework": "react",
   "cssPreProcessor": false,
   "template": "single-view",
   "theming": {
-    "color": "#007aff",
+    "color": "#205cf1",
     "darkTheme": false,
     "fillBars": false
   },
