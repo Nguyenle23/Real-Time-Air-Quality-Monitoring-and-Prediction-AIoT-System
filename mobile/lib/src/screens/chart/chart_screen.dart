@@ -21,6 +21,10 @@ class _ChartScreenState extends State<ChartScreen> {
         "attributes": [
           {"name": "temperature", "properties": []},
           {"name": "humidity", "properties": []},
+          {"name": "CO2", "properties": []},
+          {"name": "CO", "properties": []},
+          {"name": "UV", "properties": []},
+          {"name": "PM2.5", "properties": []},
         ],
       },
       {
@@ -28,6 +32,10 @@ class _ChartScreenState extends State<ChartScreen> {
         "attributes": [
           {"name": "temperature", "properties": []},
           {"name": "humidity", "properties": []},
+          {"name": "CO2", "properties": []},
+          {"name": "CO", "properties": []},
+          {"name": "UV", "properties": []},
+          {"name": "PM2.5", "properties": []},
         ],
       },
     ]
@@ -39,24 +47,39 @@ class _ChartScreenState extends State<ChartScreen> {
       DateFormat('yyyy-MM-dd%2023:59:00').format(DateTime.now().toUtc());
 
   String urlTempHCM = "";
-  String urlTempTD = "";
   String urlHumiHCM = "";
+  String urlCO2HCM = "";
+  String urlCOHCM = "";
+  String urlUVHCM = "";
+  String urlPM25HCM = "";
+
+  String urlTempTD = "";
   String urlHumiTD = "";
 
   @override
   void initState() {
     super.initState();
     urlTempHCM =
-        "https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
-    urlTempTD =
-        "https://api.thingspeak.com/channels/2239030/fields/1.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+        "https://api.thingspeak.com/channels/2404698/fields/1.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
     urlHumiHCM =
-        "https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+        "https://api.thingspeak.com/channels/2404698/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+    urlCO2HCM =
+        "https://api.thingspeak.com/channels/2404698/fields/3.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+    urlCOHCM =
+        "https://api.thingspeak.com/channels/2404698/fields/4.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+    urlUVHCM =
+        "https://api.thingspeak.com/channels/2404698/fields/5.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+    urlPM25HCM =
+        "https://api.thingspeak.com/channels/2404698/fields/6.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+
+    urlTempTD =
+        "https://api.thingspeak.com/channels/2115707/fields/1.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
     urlHumiTD =
-        "https://api.thingspeak.com/channels/2239030/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+        "https://api.thingspeak.com/channels/2115707/fields/2.json?timezone=Asia%2FBangkok&results=288&start=$formatInputStartDate&end=$formatInputEndDate";
+
     fetchDataHCM();
-    fetchDataTD();
     fetchDataHumiHCM();
+    fetchDataTD();
   }
 
   void fetchDataHumiHCM() async {
@@ -86,8 +109,6 @@ class _ChartScreenState extends State<ChartScreen> {
       }
 
       // Print updated jsonData for demonstration
-      // print(dataObject);
-
       setState(() {
         dataObject = dataObject;
       });
@@ -206,7 +227,7 @@ class _ChartScreenState extends State<ChartScreen> {
     final List<dynamic> stations = dataObject['station'];
     List<Map<String, dynamic>> temperatureDataHCM = [];
     List<Map<String, dynamic>> temperatureDataTD = [];
-    List<Map<String, dynamic>> humiHCM = [];
+    // List<Map<String, dynamic>> humiHCM = [];
 
     for (var station in stations) {
       if (station['name'] == 'HCM') {
@@ -217,9 +238,9 @@ class _ChartScreenState extends State<ChartScreen> {
                 List<Map<String, dynamic>>.from(attribute['properties']);
           }
 
-          if (attribute['name'] == 'humidity') {
-            humiHCM = List<Map<String, dynamic>>.from(attribute['properties']);
-          }
+          // if (attribute['name'] == 'humidity') {
+          //   humiHCM = List<Map<String, dynamic>>.from(attribute['properties']);
+          // }
         }
       }
       if (station['name'] == 'TD') {
@@ -242,7 +263,8 @@ class _ChartScreenState extends State<ChartScreen> {
             DateTime.parse(data['created_at']),
         yValueMapper: (Map<String, dynamic> data, _) => data['value'] as double,
         legendItemText: 'Ho Chi Minh',
-        color: Colors.green,
+        color: Colors.blue,
+        enableTooltip: true,
       ),
       FastLineSeries<Map<String, dynamic>, DateTime>(
         dataSource: temperatureDataTD,
@@ -250,7 +272,8 @@ class _ChartScreenState extends State<ChartScreen> {
             DateTime.parse(data['created_at']),
         yValueMapper: (Map<String, dynamic> data, _) => data['value'] as double,
         legendItemText: 'Thu Duc',
-        color: Colors.blue,
+        color: Colors.green,
+        enableTooltip: true,
       ),
     ];
   }
@@ -288,16 +311,18 @@ class _ChartScreenState extends State<ChartScreen> {
             DateTime.parse(data['created_at']),
         yValueMapper: (Map<String, dynamic> data, _) => data['value'] as double,
         legendItemText: 'Ho Chi Minh',
-        color: Colors.green,
-      ),
-      FastLineSeries<Map<String, dynamic>, DateTime>(
-        dataSource: humidityDataTD,
-        xValueMapper: (Map<String, dynamic> data, _) =>
-            DateTime.parse(data['created_at']),
-        yValueMapper: (Map<String, dynamic> data, _) => data['value'] as double,
-        legendItemText: 'Thu Duc',
         color: Colors.blue,
+        enableTooltip: true,
       ),
+      // FastLineSeries<Map<String, dynamic>, DateTime>(
+      //   dataSource: humidityDataTD,
+      //   xValueMapper: (Map<String, dynamic> data, _) =>
+      //       DateTime.parse(data['created_at']),
+      //   yValueMapper: (Map<String, dynamic> data, _) => data['value'] as double,
+      //   legendItemText: 'Thu Duc',
+      //   color: Colors.green,
+      //   enableTooltip: true,
+      // ),
     ];
   }
 
@@ -317,19 +342,19 @@ class _ChartScreenState extends State<ChartScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: constantColor.primaryColor,
+                  color: constantColor.blackColor,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              // color: constantColor.tertiaryColor,
               child: SfCartesianChart(
+                tooltipBehavior: TooltipBehavior(enable: true),
                 plotAreaBorderColor: Colors.black,
                 plotAreaBorderWidth: 1,
-                // backgroundColor: Colors.blue[50],
+                backgroundColor: constantColor.primaryColor.withOpacity(.15),
                 zoomPanBehavior: ZoomPanBehavior(
                   enablePanning: true,
                   enableDoubleTapZooming: true,
@@ -344,17 +369,17 @@ class _ChartScreenState extends State<ChartScreen> {
                   axisLine: const AxisLine(width: 0),
                   majorTickLines:
                       const MajorTickLines(color: Colors.transparent),
-                  minimum: 20,
+                  minimum: 25,
                   maximum: 40,
                   interval: 5,
                   edgeLabelPlacement: EdgeLabelPlacement.shift,
                   numberFormat: NumberFormat.compact(),
                 ),
                 title: ChartTitle(
-                  text: 'Temperature values chart (°C)',
+                  text: 'Historical Data of Temperature (°C)',
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
                 legend: const Legend(
@@ -365,17 +390,19 @@ class _ChartScreenState extends State<ChartScreen> {
               ),
             ),
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: constantColor.primaryColor,
+                  color: constantColor.blackColor,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: SfCartesianChart(
+                tooltipBehavior: TooltipBehavior(enable: true),
                 plotAreaBorderColor: Colors.black,
                 plotAreaBorderWidth: 1,
+                backgroundColor: constantColor.primaryColor.withOpacity(.15),
                 zoomPanBehavior: ZoomPanBehavior(
                   enablePanning: true,
                   enableDoubleTapZooming: true,
@@ -390,17 +417,17 @@ class _ChartScreenState extends State<ChartScreen> {
                   axisLine: const AxisLine(width: 0),
                   majorTickLines:
                       const MajorTickLines(color: Colors.transparent),
-                  minimum: 20,
-                  maximum: 40,
-                  interval: 5,
+                  minimum: 35,
+                  maximum: 95,
+                  interval: 10,
                   edgeLabelPlacement: EdgeLabelPlacement.shift,
                   numberFormat: NumberFormat.compact(),
                 ),
                 title: ChartTitle(
-                  text: 'Humidity values chart (%)',
+                  text: 'Historical Data of Humdity (%)',
                   textStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: 16,
                   ),
                 ),
                 legend: const Legend(

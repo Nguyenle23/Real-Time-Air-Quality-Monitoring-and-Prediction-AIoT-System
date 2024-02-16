@@ -17,7 +17,7 @@ class _InfoScreenState extends State<InfoScreen> {
           children: [
             //information about the air quality index level
             const Text(
-              'Air Quality Index (AQI) Level',
+              'Air Quality Index (AQI)',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -26,70 +26,89 @@ class _InfoScreenState extends State<InfoScreen> {
             const SizedBox(
               height: 10,
             ),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black, // Set text color to white
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
                 ),
-                children: [
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                Expanded(
+                  child: Text(
+                    'The AQI is an index for reporting daily air quality. It tells you how clean or polluted your air is, and what associated health effects might be a concern for you.',
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
                   ),
-                  TextSpan(
-                    text:
-                        ' The AQI is an index for reporting daily air quality. It tells you how clean or polluted your air is, and what associated health effects might be a concern for you.',
-                  ),
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                ),
+              ],
+            ),
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
+                ),
+                Expanded(
+                  child: Text(
+                    'The AQI focuses on health effects you may experience within a few hours or days after breathing polluted air.',
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
                   ),
-                  TextSpan(
-                    text:
-                        ' The AQI focuses on health effects you may experience within a few hours or days after breathing polluted air.',
-                  ),
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                ),
+              ],
+            ),
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
+                ),
+                Expanded(
+                  child: Text(
+                    'EPA calculates the AQI for five major air pollutants regulated by the Clean Air Act: ground-level ozone, particle pollution (also known as particulate matter), carbon monoxide, sulfur dioxide, and nitrogen dioxide.',
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
                   ),
-                  TextSpan(
-                    text:
-                        ' EPA calculates the AQI for five major air pollutants regulated by the Clean Air Act: ground-level ozone, particle pollution (also known as particulate matter), carbon monoxide, sulfur dioxide, and nitrogen dioxide.',
-                  ),
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                ),
+              ],
+            ),
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
+                ),
+                Expanded(
+                  child: Text(
+                    'For each of these pollutants, EPA has established national air quality standards to protect public health.',
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
                   ),
-                  TextSpan(
-                    text:
-                        ' For each of these pollutants, EPA has established national air quality standards to protect public health.',
-                  ),
-                  WidgetSpan(
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                ),
+              ],
+            ),
+            const Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: Colors.blue,
+                ),
+                Expanded(
+                  child: Text(
+                    'Ground-level ozone and airborne particles are the two pollutants that pose the greatest threat to human health in this country.',
+                    style: TextStyle(
+                      fontSize: 15,
                     ),
                   ),
-                  TextSpan(
-                    text:
-                        ' Ground-level ozone and airborne particles are the two pollutants that pose the greatest threat to human health in this country.',
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(
               height: 20,
             ),
-
             const Text(
               'Levels of Air Quality Index',
               style: TextStyle(

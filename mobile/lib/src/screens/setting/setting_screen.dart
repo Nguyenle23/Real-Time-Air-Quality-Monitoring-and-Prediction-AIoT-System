@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iu_air_quality/src/screens/setting/sub_setting/general_info_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -240,7 +241,6 @@ class _SettingScreenState extends State<SettingScreen> {
                     size: 30,
                   ),
                 ),
-                
               ],
             ),
             Row(
@@ -275,23 +275,27 @@ class _SettingScreenState extends State<SettingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Icon(
-                  Icons.question_answer_outlined,
+                  Icons.web_asset,
                   size: 30,
                 ),
                 const SizedBox(
                   width: 10,
                 ),
                 const Text(
-                  'FAQs',
+                  'Website',
                   style: TextStyle(
                     fontSize: 20,
                   ),
                 ),
                 const SizedBox(
-                  width: 210,
+                  width: 180,
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Uri url =
+                        Uri.parse('https://www.aiair-aiotlabvn.tech/');
+                    launchUrl(url);
+                  },
                   icon: const Icon(
                     Icons.keyboard_arrow_right_rounded,
                     size: 30,
@@ -303,18 +307,28 @@ class _SettingScreenState extends State<SettingScreen> {
             //version number
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children:  [
-                Image(
-                  image: AssetImage('assets/images/LogoAIoT.png'),
-                  height: 80,
-                  width: 80,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage('assets/images/aiair.png'),
+                      height: 80,
+                      width: 80,
+                    ),
+                    Image(
+                      image: AssetImage('assets/images/LogoAIoT.png'),
+                      height: 80,
+                      width: 80,
+                    ),
+                  ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Text(
                   _packageInfo.version,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                   ),
                 ),

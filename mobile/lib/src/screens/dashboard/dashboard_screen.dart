@@ -49,13 +49,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String windDirectionTD = '';
 
   String newsetDataHCM =
-      "https://api.thingspeak.com/channels/2115707/feeds.json?results=1&timezone=Asia%2FBangkok";
+      "https://api.thingspeak.com/channels/2404698/feeds.json?results=1&timezone=Asia%2FBangkok";
 
   String newsetWindHCM =
       "https://api.openweathermap.org/data/2.5/weather?lat=10.7936588867&lon=106.6803109431&appid=99d40475f251003865b51c383d6fda8d";
 
   String newsetDataTD =
-      "https://api.thingspeak.com/channels/2239030/feeds.json?results=1&timezone=Asia%2FBangkok";
+      "https://api.thingspeak.com/channels/2115707/feeds.json?results=1&timezone=Asia%2FBangkok";
 
   String newsetWindTD =
       "https://api.openweathermap.org/data/2.5/weather?lat=10.8619784&lon=106.8034464&appid=99d40475f251003865b51c383d6fda8d";
