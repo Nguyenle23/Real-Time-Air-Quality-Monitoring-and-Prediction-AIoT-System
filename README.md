@@ -18,6 +18,8 @@
 
 <h4>Present slides: <a href=https://www.canva.com/design/DAF7i1xX47c/IyQZU9MTtVMhfnwKaPM-rQ/edit> here </a> </h4>
 
+<h4>Video demo: https://youtu.be/NBvkcnzNGVQ</h4>
+
 <h4>Deployment: https://www.aiair-aiotlabvn.tech/</h4>
 
 <h2 id="table-of-contents"> :book: Table of Contents</h2>
