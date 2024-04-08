@@ -25,11 +25,10 @@
   <summary>Table of Contents</summary>
   <ol>
     <li><a href="#general-information">General Information</a></li>
-    <li><a href="#folder-structure">Folder Structure</a></li>
     <li>
       <a href="#setup">Setup Tutorial</a>
        <ul>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/aiair-server/README.md">aiair-server</a></li>
+        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/aiair-server/README.md">Aiair-server</a></li>
         <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/client/README.md">Client</a></li>
         <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/microcontroller/README.md">Microcontroller</a></li>
         <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/mobile/README.md">Mobile</a></li>
@@ -37,17 +36,29 @@
         <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/server/README.md">Server</a></li>
        </ul>
     </li>
+    <li><a href="#folder-structure">Folder Structure</a></li>
   </ol>
 </details>
 
 <h2 id="general-information"> 🧮 General Information</h2>
 
+- **AIAir-Server** : The folder for deploying server for <a href=https://www.aiair-aiotlabvn.tech/>AIAir Website<a/>
 - **Client** : The client for the user, built with ReactJS, Openstreetmap, and the HighCharts plugin.
+- **Microcontroller** : The folder for storing code to upload on hardware devices.
 - **Mobile** : The mobile interface for the user, using Flutter framework, Openstreetmap, and the Syncfusion.
 - **ZMP** : The Zalo Mini App platform provided by Zalo with ReactJS.
 - **Server** : The server is using the Flask framework, integrating with a variety of models and algorithms.
 
-<!-- FOLDER STRUCTURE -->
+<h2 id="setup"> 🧰 Setup</h2>
+<ul>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/aiair-server/README.md">Aiair-server</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/client/README.md">Client</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/microcontroller/README.md">Microcontroller</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/mobile/README.md">Mobile</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/zmp/README.md">Zalo Mini Platform</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/server/README.md">Server</a></li>
+</ul>
+
 <h2 id="folder-structure"> 🗺️ Folder Structure</h2>
 
     ├── aiair-server
@@ -93,13 +104,3 @@
     │   │   ├── static
     │   │   ├── utils
     │   │   ├── app.js
-
-<h2 id="setup"> 🧰 Setup</h2>
-  <ul>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/aiair-server/README.md">aiair-server</a></li>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/client/README.md">Client</a></li>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/microcontroller/README.md">Microcontroller</a></li>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/mobile/README.md">Mobile</a></li>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/zmp/README.md">Zalo Mini Platform</a></li>
-        <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/server/README.md">Server</a></li>
-  </ul>
