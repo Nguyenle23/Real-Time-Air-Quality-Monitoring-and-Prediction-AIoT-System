@@ -53,12 +53,12 @@
 
 <h2 id="setup"> 🧰 Setup</h2>
 <ul>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/aiair-server/README.md">Aiair-server</a></li>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/client/README.md">Client</a></li>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/microcontroller/README.md">Microcontroller</a></li>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/mobile/README.md">Mobile</a></li>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/zmp/README.md">Zalo Mini Platform</a></li>
-      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/server/README.md">Server</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/tree/main/aiair-server">Aiair-server</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/client">Client</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/microcontroller">Microcontroller</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/mobile">Mobile</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/zmp">Zalo Mini Platform</a></li>
+      <li><a href="https://github.com/Nguyenle23/AIAir-Quality-System/edit/main/server">Server</a></li>
 </ul>
 
 <h2 id="folder-structure"> 🗺️ Folder Structure</h2>
