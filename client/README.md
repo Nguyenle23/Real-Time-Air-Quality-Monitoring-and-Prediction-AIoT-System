@@ -1,4 +1,4 @@
-# Installation and Usage for client Guide
+# Client Setup Guide
 
 This README file provides instructions on how to install and run the ReactJS client application.
 
